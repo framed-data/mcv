@@ -14,7 +14,8 @@ def ent_passwd(username):
         return None
 
 def exists(username):
-    return bool(ent_passwd(username))
+    status = subprocess.call(["/usr/bin/getent", "passwd", username])
+    return status == 0
 
 def _add(username):
     cmd = ["useradd", username]
