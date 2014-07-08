@@ -48,10 +48,10 @@ conn_spec = {'host': 'mybox.example.com', 'user': 'me'}
 
 # copy your MCV setup script from above to remote box
 with mcv.deploy.connection(conn_spec) as ssh:
-  mcv.deploy.deploy(ssh, '/home/me/my-mcv', '/var/run/mcv', sudo=True)
-  mcv.deploy.execute(ssh, '/usr/bin/sudo apt-get install -y python-dev python-pip')
-  mcv.deploy.execute(ssh, '/usr/bin/sudo pip install labrador mcv')
-  mcv.deploy.execute(ssh, 'cd /var/run/mcv && /usr/bin/sudo /usr/bin/python ./m.py')
+    mcv.deploy.deploy(ssh, '/home/me/my-mcv', '/var/run/mcv', sudo=True)
+    mcv.deploy.execute(ssh, '/usr/bin/sudo apt-get install -y python-dev python-pip')
+    mcv.deploy.execute(ssh, '/usr/bin/sudo pip install labrador mcv')
+    mcv.deploy.execute(ssh, 'cd /var/run/mcv && /usr/bin/sudo /usr/bin/python ./m.py')
 ```
 
 Design and Rationale 
