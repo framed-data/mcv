@@ -18,12 +18,11 @@ def _install(ssh, pkgs):
     if not pkgs:
         return (None, None, None)
 
-    out, err, exit = mcv.remote.execute(ssh, [mcv.apt.apt_cmd, 'install', '-y'] + pkgs, sudo=True)
-    return (True, out, err)
+    return mcv.remote.execute(ssh, [mcv.apt.apt_cmd, 'install', '-y'] + pkgs, sudo=True)
 
 def install(ssh, pkgs, verbose=False):
     installed_packages = status(ssh, pkgs)
     pkgs_to_install = [p for p in pkgs if not installed_packages[p]]
-    install_status, out, err = _install(ssh, pkgs_to_install)
-    return (install_status, out, err)
+
+    return _install(ssh, pkgs_to_install)
 
