@@ -31,7 +31,7 @@ if __name__ == "__main__":
         authorized_keys = labrador.get('https://github.com/{}.keys'.format(user))
         mcv.user.add(
             user,
-            mod_opts={'groups': ['sudo']},e
+            mod_opts={'groups': ['sudo']},
             ext_opts={'authorized_keys': authorized_keys})
 ```
 
