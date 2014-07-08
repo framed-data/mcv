@@ -46,7 +46,21 @@ def sftp_connection(ssh_connection):
     yield sftp
     sftp.close()
 
-def execute(ssh, cmd, sudo=False):
+def _exec_command(ssh, command, bufsize=-1, timeout=None, get_pty=False):
+    """Version of paramiko.SSHClient.exec_command that also returns
+    exit status"""
+    chan = ssh._transport.open_session()
+    if get_pty:
+        chan.get_pty()
+    chan.settimeout(timeout)
+    chan.exec_command(command)
+    stdin = chan.makefile('wb', bufsize)
+    stdout = chan.makefile('r', bufsize)
+    stderr = chan.makefile_stderr('r', bufsize)
+    exit = chan.recv_exit_status()
+    return stdin, stdout, stderr, exit
+
+def execute(ssh, cmd, sudo=False, verbose='error'):
     # cmd might not be a string; might be a list i.e.
     # `subprocess`-style.  Handle it nicely.
     cmd_string = cmd if isinstance(cmd, basestring) else ' '.join(cmd)
@@ -54,10 +68,16 @@ def execute(ssh, cmd, sudo=False):
     final_cmd = '/usr/bin/sudo /bin/sh -c {}'.format(
             pipes.quote(cmd_string)) if sudo else cmd_string
 
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(final_cmd)
+    ssh_stdin, ssh_stdout, ssh_stderr, exit = _exec_command(ssh, final_cmd)
     out = ssh_stdout.read()
     err = ssh_stderr.read()
-    return (out, err)
+
+    if verbose == True or (verbose == 'error' and exit != 0):
+        sys.stdout.write(out)
+        sys.stderr.write(err)
+        sys.stderr.write("Exited with status: {}\n".format(exit))
+
+    return (out, err, exit)
 
 def _copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
@@ -77,33 +97,26 @@ def copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
     _copy(ssh, local_src, remote_dst, sudo)
 
-def deploy(ssh, local_src, remote_dst, sudo=False, verbose=False):
+def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error'):
     temp = tempfile.NamedTemporaryFile()
     cmd = ['/bin/tar', '-cvf', temp.name, local_src]
-    print "Tarring to " + temp.name
+
+    if verbose == True:
+        sys.stderr.write("Tarring to {}\n".format(temp.name))
+
     out = subprocess.check_output(cmd)
 
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('mktemp')
     remote_temppath = ssh_stdout.read().strip()
-    print "Copying tarball to " + remote_temppath
+
+    if verbose == True:
+        sys.stderr.write("Copying tarball to {}\n".format(remote_temppath))
+
     _copy(ssh, temp.name, remote_temppath, sudo=False)
 
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
-        '{}mkdir -p {}'.format(
-            'sudo ' if sudo else '',
-            remote_dst))
+    mkdir_cmd = 'mkdir -p {}'.format(remote_dst)
 
-    if verbose:
-        sys.stdout.write(ssh_stdout.read())
-        sys.stderr.write(ssh_stderr.read())
+    out, err, exit = execute(ssh, mkdir_cmd, sudo=sudo, verbose=verbose)
 
-    tar_cmd = '{}tar -xvf {} -C {}'.format(
-                  'sudo ' if sudo else '',
-                  remote_temppath,
-                  remote_dst)
-    print tar_cmd
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(tar_cmd)
-
-    if verbose:
-        sys.stdout.write(ssh_stdout.read())
-        sys.stderr.write(ssh_stderr.read())
+    tar_cmd = 'tar -xvf {} -C {}'.format(remote_temppath, remote_dst)
+    out, err, exit = execute(ssh, tar_cmd, sudo=sudo, verbose=verbose)
