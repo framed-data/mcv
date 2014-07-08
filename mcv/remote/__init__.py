@@ -29,9 +29,14 @@ def connection(connspec, verbose=False):
 
     host = connspec.pop('host', None)
 
-    sys.stderr.write("Connecting...")
+    if verbose:
+        sys.stderr.write("Connecting...")
+
     ssh.connect(host, **connspec)
-    sys.stderr.write("OK.\n")
+
+    if verbose:
+        sys.stderr.write("OK.\n")
+
     yield ssh
     ssh.close()
 
