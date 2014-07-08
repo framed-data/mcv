@@ -4,10 +4,14 @@ import re
 import os
 
 pip_cmd = "/usr/bin/pip"
+pip_list_cmd = [pip_cmd, 'list']
+
+def _status(pip_output):
+    return dict([l.split() for l in pip_output.split('\n') if l])
 
 def status(pkgs):
-    out = subprocess.check_output(['/usr/bin/pip', 'list']).strip()
-    installed = dict([l.split() for l in out.split('\n')])
+    out = subprocess.check_output(pip_list_cmd).strip()
+    installed = _status(out)
     return { p:installed.get(p) for p in pkgs }
 
 def _install(pkgs):
