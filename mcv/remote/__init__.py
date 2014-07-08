@@ -5,30 +5,32 @@ import getpass
 import os
 import tempfile
 import StringIO
+import pipes
 
 from contextlib import contextmanager
 
+def conn_spec():
+    """Return a connection specification with sane default values."""
+    return {'username': getpass.getuser(),
+            'missing_host_key_policy': paramiko.AutoAddPolicy(),
+            'host_keys_path': os.path.join("~", ".ssh", "known_hosts")}
+
 @contextmanager
 def connection(connspec, verbose=False):
-    host = connspec['host']
-    username = connspec.get('username', getpass.getuser())
-    password = connspec.get('password')
-
     ssh = paramiko.SSHClient()
 
-    missing_host_key_policy = connspec.get('missing_host_key_policy',
-            paramiko.AutoAddPolicy())
+    missing_host_key_policy = connspec.pop('missing_host_key_policy', None)
     if missing_host_key_policy:
         ssh.set_missing_host_key_policy(missing_host_key_policy)
 
-    host_keys_path = connspec.get('host_keys_path',
-                         os.path.join("~", ".ssh", "known_hosts"))
-    host_keys_path_expanded = os.path.expanduser(host_keys_path)
-    if os.path.exists(host_keys_path_expanded):
-        ssh.load_host_keys(host_keys_path_expanded)
+    host_keys_path = os.path.expanduser(connspec.pop('host_keys_path', ''))
+    if host_keys_path and os.path.exists(host_keys_path):
+        ssh.load_host_keys(host_keys_path)
+
+    host = connspec.pop('host', None)
 
     sys.stderr.write("Connecting...")
-    ssh.connect(connspec['host'], username=username, password=password)
+    ssh.connect(host, **connspec)
     sys.stderr.write("OK.\n")
     yield ssh
     ssh.close()
@@ -39,10 +41,18 @@ def sftp_connection(ssh_connection):
     yield sftp
     sftp.close()
 
-def execute(ssh, cmd, stdout=sys.stdout, stderr=sys.stderr):
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
-    stdout.write(ssh_stdout.read())
-    stderr.write(ssh_stderr.read())
+def execute(ssh, cmd, sudo=False):
+    # cmd might not be a string; might be a list i.e.
+    # `subprocess`-style.  Handle it nicely.
+    cmd_string = cmd if isinstance(cmd, basestring) else ' '.join(cmd)
+
+    final_cmd = '/usr/bin/sudo /bin/sh -c {}'.format(
+            pipes.quote(cmd_string)) if sudo else cmd_string
+
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(final_cmd)
+    out = ssh_stdout.read()
+    err = ssh_stderr.read()
+    return (out, err)
 
 def _copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""

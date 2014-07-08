@@ -42,19 +42,19 @@ if __name__ == "__main__":
 ```python
 #!/usr/bin/env python
 
-import mcv.deploy
+import mcv.remote
 
 conn_spec = {'host': 'mybox.example.com', 'user': 'me'}
 
 # copy your MCV setup script from above to remote box
-with mcv.deploy.connection(conn_spec) as ssh:
-    mcv.deploy.deploy(ssh, '/home/me/my-mcv', '/var/run/mcv', sudo=True)
-    mcv.deploy.execute(ssh, '/usr/bin/sudo apt-get install -y python-dev python-pip')
-    mcv.deploy.execute(ssh, '/usr/bin/sudo pip install labrador mcv')
-    mcv.deploy.execute(ssh, 'cd /var/run/mcv && /usr/bin/sudo /usr/bin/python ./m.py')
+with mcv.remote.connection(conn_spec) as ssh:
+    mcv.remote.deploy(ssh, '/home/me/my-mcv', '/var/run/mcv', sudo=True)
+    mcv.remote.execute(ssh, '/usr/bin/sudo apt-get install -y python-dev python-pip')
+    mcv.remote.execute(ssh, '/usr/bin/sudo pip install labrador mcv')
+    mcv.remote.execute(ssh, 'cd /var/run/mcv && /usr/bin/sudo /usr/bin/python ./m.py')
 ```
 
-Design and Rationale 
+Design and Rationale
 --------------------
 
 MCV makes a few different design choices vs. other systems:
