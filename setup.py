@@ -6,7 +6,7 @@ setup(
     install_requires = [
         'pyyaml',
         'labrador',
-        'fabric'],
+        'paramiko'],
     author = "Elliot Block",
     author_email = "elliot@deck36.net",
     description = "Dumb-is-the-new-smart configuration management",
