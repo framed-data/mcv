@@ -25,7 +25,7 @@ def _dpkg_status(dpkg_query_output):
     This is split out into separate components so that it's
     agnostic as to whether the dpkg output came from a local
     source or a remote one, e.g. see mcv.remote.apt"""
-    normalized = dpkg_query_output.strip()
+    normalized = dpkg_query_output.strip() if dpkg_query_output else None
     if not normalized:
         return None
 
