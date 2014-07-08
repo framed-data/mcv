@@ -39,11 +39,10 @@ def sftp_connection(ssh_connection):
     yield sftp
     sftp.close()
 
-def execute(connspec, cmd, stdout=sys.stdout, stderr=sys.stderr):
-    with connection(connspec) as ssh:
-        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
-        stdout.write(ssh_stdout.read())
-        stderr.write(ssh_stderr.read())
+def execute(ssh, cmd, stdout=sys.stdout, stderr=sys.stderr):
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
+    stdout.write(ssh_stdout.read())
+    stderr.write(ssh_stderr.read())
 
 def _copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
@@ -59,39 +58,37 @@ def _copy(ssh, local_src, remote_dst, sudo=False):
         with sftp_connection(ssh) as sftp:
             sftp.put(local_src, remote_dst)
 
-def copy(connspec, local_src, remote_dst, sudo=False):
+def copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
-    with connection(connspec) as ssh:
-        _copy(ssh, local_src, remote_dst, sudo)
+    _copy(ssh, local_src, remote_dst, sudo)
 
-def deploy(connspec, local_src, remote_dst, sudo=False, verbose=False):
+def deploy(ssh, local_src, remote_dst, sudo=False, verbose=False):
     temp = tempfile.NamedTemporaryFile()
     cmd = ['/bin/tar', '-cvf', temp.name, local_src]
     print "Tarring to " + temp.name
     out = subprocess.check_output(cmd)
 
-    with connection(connspec, verbose=verbose) as ssh:
-        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('mktemp')
-        remote_temppath = ssh_stdout.read().strip()
-        print "Copying tarball to " + remote_temppath
-        _copy(ssh, temp.name, remote_temppath, sudo=False)
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('mktemp')
+    remote_temppath = ssh_stdout.read().strip()
+    print "Copying tarball to " + remote_temppath
+    _copy(ssh, temp.name, remote_temppath, sudo=False)
 
-        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
-            '{}mkdir -p {}'.format(
-                'sudo ' if sudo else '',
-                remote_dst))
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
+        '{}mkdir -p {}'.format(
+            'sudo ' if sudo else '',
+            remote_dst))
 
-        if verbose:
-            sys.stdout.write(ssh_stdout.read())
-            sys.stderr.write(ssh_stderr.read())
+    if verbose:
+        sys.stdout.write(ssh_stdout.read())
+        sys.stderr.write(ssh_stderr.read())
 
-        tar_cmd = '{}tar -xvf {} -C {}'.format(
-                      'sudo ' if sudo else '',
-                      remote_temppath,
-                      remote_dst)
-        print tar_cmd
-        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(tar_cmd)
+    tar_cmd = '{}tar -xvf {} -C {}'.format(
+                  'sudo ' if sudo else '',
+                  remote_temppath,
+                  remote_dst)
+    print tar_cmd
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(tar_cmd)
 
-        if verbose:
-            sys.stdout.write(ssh_stdout.read())
-            sys.stderr.write(ssh_stderr.read())
+    if verbose:
+        sys.stdout.write(ssh_stdout.read())
+        sys.stderr.write(ssh_stderr.read())
