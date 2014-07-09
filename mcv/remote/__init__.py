@@ -12,6 +12,7 @@ from contextlib import contextmanager
 def conn_spec():
     """Return a connection specification with sane default values."""
     return {'username': getpass.getuser(),
+            'port': 22,
             'missing_host_key_policy': paramiko.AutoAddPolicy(),
             'host_keys_path': os.path.join("~", ".ssh", "known_hosts")}
 
