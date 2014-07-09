@@ -8,8 +8,7 @@ setup(
         'labrador',
         'paramiko'],
     author = "Elliot Block",
-    author_email = "elliot@deck36.net",
-    description = "Dumb-is-the-new-smart configuration management",
-    url = "https://github.com/elliot42/mcv",
-    scripts = ['bin/mcv']
+    author_email = "elliot@framed.io",
+    description = "Spartan configuration management in Python",
+    url = "https://github.com/framed-data/mcv",
 )
