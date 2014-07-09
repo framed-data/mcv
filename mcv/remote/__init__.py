@@ -41,7 +41,11 @@ def connection(connspec, verbose=False):
     host = connspec.pop('host', None)
 
     if verbose:
-        sys.stderr.write("Connecting...")
+        sys.stderr.write(
+                "Connecting to {user}@{host}:{port}...".format(
+                user=connspec['username'],
+                host=host,
+                port=connspec['port']))
 
     ssh.connect(host, **connspec)
 
