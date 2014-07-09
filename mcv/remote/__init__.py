@@ -17,6 +17,16 @@ def conn_spec():
 
 @contextmanager
 def connection(connspec, verbose=False):
+    """Takes a connection specification with standard Paramiko values, i.e.:
+
+    - host
+    - port
+    - username (default: getpass.getuser())
+
+    As well as 'extended' configuration for Paramiko:
+    - missing_host_key_policy
+    - host_keys_path
+    """
     ssh = paramiko.SSHClient()
 
     missing_host_key_policy = connspec.pop('missing_host_key_policy', None)
@@ -61,6 +71,18 @@ def _exec_command(ssh, command, bufsize=-1, timeout=None, get_pty=False):
     return stdin, stdout, stderr, exit
 
 def execute(ssh, cmd, sudo=False, verbose='error'):
+    """Executes a command on remote machine over SSH
+
+    Takes:
+    - Paramiko ssh connection
+    - command in either string "/bin/ls" or list ["/bin/ls", "/etc"]
+      form
+
+    Returns:
+    - stdout string
+    - stderr string
+    - exit status of remote command
+    """
     # cmd might not be a string; might be a list i.e.
     # `subprocess`-style.  Handle it nicely.
     cmd_string = cmd if isinstance(cmd, basestring) else ' '.join(cmd)
@@ -98,6 +120,7 @@ def copy(ssh, local_src, remote_dst, sudo=False):
     _copy(ssh, local_src, remote_dst, sudo)
 
 def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error'):
+    """Copies whole directories to remote machine"""
     temp = tempfile.NamedTemporaryFile()
     cmd = ['/bin/tar', '-cvf', temp.name, local_src]
 
