@@ -24,6 +24,7 @@ def connection(connspec, verbose=False):
     - host
     - port
     - username (default: getpass.getuser())
+    - key_file (path to private key)
 
     As well as 'extended' configuration for Paramiko:
     - missing_host_key_policy
