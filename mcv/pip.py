@@ -14,15 +14,21 @@ def status(pkgs):
     installed = _status(out)
     return { p:installed.get(p) for p in pkgs }
 
-def _install(pkgs):
+def _install_cmd(pkgs, upgrade=False):
     if not pkgs:
-        return True
+        return None
 
-    cmd = [pip_cmd, 'install'] + pkgs
-    retval = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
-    return retval
+    opt_upgrade = ['--upgrade'] if upgrade else []
+
+    return [pip_cmd, 'install'] + opt_uprade + pkgs
 
 def install(pkgs):
     installed_packages = status(pkgs)
     pkgs_to_install = [p for p in pkgs if not installed_packages[p]]
-    return _install(pkgs_to_install)
+
+    cmd = _install_cmd(pkgs_to_install, upgrade=upgrade)
+
+    if cmd:
+        return subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    else:
+        return None
