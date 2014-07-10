@@ -6,6 +6,7 @@ import os
 import tempfile
 import StringIO
 import pipes
+import itertools
 
 from contextlib import contextmanager
 
@@ -124,13 +125,17 @@ def copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
     _copy(ssh, local_src, remote_dst, sudo)
 
-def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error'):
+def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error', excludes=['.git']):
     """Copies whole directories to remote machine"""
     temp = tempfile.NamedTemporaryFile()
-    cmd = ['/bin/tar', '-cvf', temp.name, local_src]
+    exclude_pairs =[['--exclude', e] for e in excludes]
+
+    cmd = ['/bin/tar', '-cvf', temp.name] + \
+          [e for e in itertools.chain(*exclude_pairs)] + \
+          [local_src]
 
     if verbose == True:
-        sys.stderr.write("Tarring to {}\n".format(temp.name))
+        sys.stderr.write("Tarring with: " + str(cmd))
 
     out = subprocess.check_output(cmd)
 
@@ -142,9 +147,15 @@ def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error'):
 
     _copy(ssh, temp.name, remote_temppath, sudo=False)
 
+    if verbose == True:
+        sys.stderr.write("Making target directory\n")
     mkdir_cmd = 'mkdir -p {}'.format(remote_dst)
 
     out, err, exit = execute(ssh, mkdir_cmd, sudo=sudo, verbose=verbose)
 
     tar_cmd = 'tar -xvf {} -C {}'.format(remote_temppath, remote_dst)
+
+    if verbose == True:
+        sys.stderr.write("Extracting tar to target directory\n")
+
     out, err, exit = execute(ssh, tar_cmd, sudo=sudo, verbose=verbose)
