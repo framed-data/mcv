@@ -88,6 +88,18 @@ def _set_mount(fstab_in, args_in):
     return "".join([' '.join(l) + "\n" for l in lines])
 
 def set_mount(args_in):
+   """Sets up a mount in /etc/fstab
+
+   Takes a dict of arguments:
+
+       {'src': '/dev/sda1', # the device
+        'name': '/tmp',     # where to mount the device
+        'fstype': 'ext3',   # filesystem type
+        'opts': 'defaults', # OPTIONAL mount opts, as a string
+        'dump': '0',        # OPTIONAL dump, as a string
+        'passno': '0',      # OPTIONAL passno, as a string
+       }
+    """
     with open("/etc/fstab", 'r') as f:
         input = f.read()
         output = _set_mount(input, args_in)
