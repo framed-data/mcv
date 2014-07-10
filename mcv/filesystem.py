@@ -88,9 +88,9 @@ def _set_mount(fstab_in, args_in):
     return "".join([' '.join(l) + "\n" for l in lines])
 
 def set_mount(args_in):
-   """Sets up a mount in /etc/fstab
+    """Sets up a mount in /etc/fstab
 
-   Takes a dict of arguments:
+    Takes a dict of arguments:
 
        {'src': '/dev/sda1', # the device
         'name': '/tmp',     # where to mount the device
@@ -103,6 +103,7 @@ def set_mount(args_in):
     with open("/etc/fstab", 'r') as f:
         input = f.read()
         output = _set_mount(input, args_in)
+
     with open("/etc/fstab", 'w') as f:
         f.write(output)
 
