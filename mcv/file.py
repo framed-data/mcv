@@ -37,7 +37,7 @@ def mkdir(path, opts={}):
     })
     """
     if not os.path.exists(path):
-        os.mkdir(path, mode)
+        os.mkdir(path, opts.get('mode', 0777)) # same default mode as Python
 
     chmod(path, opts.get('mode'))
     chown(path, opts.get('owner'), opts.get('group'))
