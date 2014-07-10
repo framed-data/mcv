@@ -29,7 +29,19 @@ def join_arg(string_or_list):
     return string_or_list
 
 def mod(username, opt_dict):
-    """Standard options for usermod"""
+    """Standard options for usermod
+
+    Variable names get prefixed by --, and iterables
+    get chained, so:
+
+        {'groups': ['framed', 'sudo']}
+
+    Gets converted to:
+
+        '--groups framed,sudo '
+
+    As you'd expect.
+    """
     if len(opt_dict) == 0:
         return
 
