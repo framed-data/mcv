@@ -16,6 +16,16 @@ umount_path = "/bin/umount"
 def partition(dev):
     """Partition an empty disk drive to have exactly 1 partition
     on it filling the whole space."""
+
+    # TODO: this is a hack for now; figure out if there's a better way
+    # to test if a disk has been partitioned.  Two known alternatives:
+    #
+    # 1. parse `parted -lm` output
+    # 2. investigate not-super-publicly-accessible `pyparted` RedHat package
+
+    if os.path.exists(dev + "1"): #e.g. /dev/sdb -> /dev/sdb1
+        return None
+
     cmd = [sgdisk_path, dev, "-N", str(1)]
     status = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
     return status
