@@ -20,9 +20,9 @@ def _install_cmd(pkgs, upgrade=False):
 
     opt_upgrade = ['--upgrade'] if upgrade else []
 
-    return [pip_cmd, 'install'] + opt_uprade + pkgs
+    return [pip_cmd, 'install'] + opt_upgrade + pkgs
 
-def install(pkgs):
+def install(pkgs, upgrade=False):
     installed_packages = status(pkgs)
     pkgs_to_install = [p for p in pkgs if not installed_packages[p]]
 

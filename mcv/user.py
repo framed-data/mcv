@@ -54,7 +54,7 @@ def mod(username, opt_dict):
 def homedir(username):
     passwd_entry = ent_passwd(username)
     return passwd_entry['home'] if passwd_entry else None
-    
+
 def ssh_keys(username, keys_str):
     home_dir = homedir(username)
     passwd_entry = ent_passwd(username)
