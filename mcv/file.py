@@ -8,6 +8,7 @@ import os
 import mcv.user
 import grp
 import subprocess
+import tempfile
 
 def chmod(path, mode, recursive=False):
     if not mode:
@@ -55,10 +56,30 @@ def mkdir(path, opts={}):
     opts={
         'owner': 'johndoe',
         'group': 'framed',
-        'mode': '02775'
+        'mode': 02775
     })
     """
     if not os.path.exists(path):
         os.mkdir(path, opts.get('mode', 0777)) # same default mode as Python
 
     ch_ext(path, opts)
+
+def link(source, link_name, force=False):
+    """Creates symlink at `link_name` pointing at `source`.
+
+    If `link_name` is already a symlink, atomically move link
+    with `mv -T`
+
+    Idempotent!  Creates or updates link.  If target is non-link,
+    will be idempotent with force=True.
+    """
+    if os.path.lexists(link_name) and os.path.islink(link_name):
+        tmppath = tempfile.mkdtemp()
+        tmp_link = os.path.join(tmppath, 'link')
+        os.symlink(source, tmp_link)
+        subprocess.call(['mv', '-T', tmp_link, link_name])
+    elif os.path.lexists(link_name) and force == True:
+        os.unlink(link_name)
+        os.symlink(source, link_name)
+    else:
+        os.symlink(source, link_name)
