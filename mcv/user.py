@@ -13,8 +13,9 @@ def ent_passwd(username):
     else:
         return None
 
-def exists(username):
-    status = subprocess.call(["/usr/bin/getent", "passwd", username])
+def exists(username, verbose='error'):
+    out = open('/dev/null', 'w') if verbose != True else sys.stdout
+    status = subprocess.call(["/usr/bin/getent", "passwd", username], stdout=out)
     return status == 0
 
 def _add(username):
