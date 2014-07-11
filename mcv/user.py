@@ -91,6 +91,12 @@ def add(username, mod_opts={}, ext_opts={}):
     mod(username, mod_opts)
     ext(username, ext_opts)
 
+def userdel(username, kill=True):
+    if exists(username):
+        if kill:
+            subprocess.call(['pkill', '-9', '-U', username])
+        subprocess.call(['deluser', '--remove-home', username])
+
 def groupadd(groupname):
     cmd = ['/usr/sbin/groupadd', '-f', groupname]
     retval = subprocess.call(cmd, stdout=sys.stdout)
