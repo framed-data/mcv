@@ -7,25 +7,47 @@ from __future__ import absolute_import
 import os
 import mcv.user
 import grp
+import subprocess
 
-def chmod(path, mode):
+def chmod(path, mode, recursive=False):
     if not mode:
         return
 
-    os.chmod(path, mode)
+    if not recursive:
+        return os.chmod(path, mode)
+    else:
+        return subprocess.call(['chmod', '-R', "{0:o}".format(mode), path])
 
-def chown(path, owner=None, group=None):
+def chown(path, owner=None, group=None, recursive=False):
     if owner:
         uid = mcv.user.ent_passwd(owner)['uid'] \
             if isinstance(owner, basestring) \
             else owner
-        os.chown(path, uid, -1)
+
+        if not recursive:
+            os.chown(path, uid, -1)
+        else:
+            subprocess.call(['chown', '-R', str(uid), path])
 
     if group:
         gid = grp.getgrnam(group).gr_gid \
             if isinstance(group, basestring) \
             else group
-        os.chown(path, -1, gid)
+
+        if not recursive:
+            os.chown(path, -1, gid)
+        else:
+            subprocess.call(['chgrp', '-R', str(gid), path])
+
+def ch_ext(path, opts={}):
+    """Change extended file attributes:
+
+    - mode
+    - owner
+    - group"""
+    recursive = opts.get('recursive', False)
+    chmod(path, opts.get('mode'), recursive=recursive)
+    chown(path, opts.get('owner'), opts.get('group'), recursive=recursive)
 
 def mkdir(path, opts={}):
     """Idempotent mkdir
@@ -39,5 +61,4 @@ def mkdir(path, opts={}):
     if not os.path.exists(path):
         os.mkdir(path, opts.get('mode', 0777)) # same default mode as Python
 
-    chmod(path, opts.get('mode'))
-    chown(path, opts.get('owner'), opts.get('group'))
+    ch_ext(path, opts)
