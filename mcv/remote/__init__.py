@@ -136,7 +136,7 @@ def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error', excludes=['.
           [local_src]
 
     if verbose == True:
-        sys.stderr.write("Tarring with: " + str(cmd))
+        sys.stderr.write("Tarring with: " + str(cmd) + "\n")
 
     out = subprocess.check_output(cmd)
 
