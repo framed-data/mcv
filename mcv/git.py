@@ -52,11 +52,7 @@ def fetch(repo_path, key_path):
 def current_rev(repo_path):
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo_path).strip()
 
-def export(repo_path, deploy_root, rev, opts={'mode': 0777}):
-    mcv.file.mkdir(deploy_root, opts=opts)
-
-    deploy_path = os.path.join(deploy_root, rev)
-
+def export(repo_path, deploy_path, rev, opts={'mode': 0777}):
     if not os.path.exists(deploy_path):
         mcv.file.mkdir(deploy_path, opts=opts)
 
