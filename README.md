@@ -15,7 +15,13 @@ MCV works in two parts:
 
 1. The local phase is a Python script that runs on a target box,
    setting up however you like using standard Python tools, plus
-   MCV's useful toolbox.  Example:
+   MCV's useful toolbox.
+
+2. The remote phase bootstraps a target system remotely over SSH,
+   setting up prereqs for your script, and then copies your script
+   over and executes it.
+
+Example local script:
 
 ```python
 #!/usr/bin/python
@@ -35,14 +41,12 @@ if __name__ == "__main__":
             ext_opts={'authorized_keys': authorized_keys})
 ```
 
-2. The remote phase bootstraps a target system by setting it up
-   remotely over SSH.  It then copies your local script over and executes
-   it.  Example:
+Example remote bootstrap script:
 
 ```python
 #!/usr/bin/env python
 
-import mcv.remote
+import mcv.remote, mcv.remote.apt, mcv.remote.pip
 
 conn_spec = {'host': 'mybox.example.com', 'user': 'me'}
 
