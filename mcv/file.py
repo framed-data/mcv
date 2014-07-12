@@ -52,7 +52,7 @@ def ch_ext(path, opts={}):
 
 def mkdir(path, opts={}):
     """Idempotent mkdir
-    
+
     opts={
         'owner': 'johndoe',
         'group': 'framed',
