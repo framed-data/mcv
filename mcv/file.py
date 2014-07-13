@@ -10,6 +10,8 @@ import grp
 import subprocess
 import tempfile
 
+opt_keys = ['owner', 'group', 'mode']
+
 def chmod(path, mode, recursive=False):
     if not mode:
         return
