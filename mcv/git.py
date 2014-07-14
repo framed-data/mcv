@@ -76,14 +76,20 @@ def current_rev(repo_path):
     """Return the current revision of the repo at local `repo_path`"""
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo_path).strip()
 
-def export(repo_path, deploy_path, rev, opts={'mode': 0777}):
+def export(repo_path, deploy_path, rev, opts={}):
     """Export a copy of the contents of the git repo
     from local `repo_path` at revision `rev` to the local
     directory `deploy_path`.  Does not include the git metadata."""
     if not os.path.exists(deploy_path):
-        mcv.file.mkdir(deploy_path, opts=opts)
+        mcv.file.mkdir(
+            deploy_path,
+            opts={'parents': opts.get('parents', True)})
 
         cmd = "git archive {rev} | tar -x -C {dir}".format(rev=rev, dir=deploy_path)
         out = subprocess.check_output(cmd, cwd=repo_path, shell=True)
-        mcv.file.ch_ext(deploy_path, opts)
+        mcv.file.ch_ext(
+            deploy_path,
+            mcv.util.merge_dicts(
+                { 'recursive': True },
+                mcv.util.select_keys(opts, ['owner', 'group'])))
         return out
