@@ -56,11 +56,15 @@ def mkdir(path, opts={}):
     opts={
         'owner': 'johndoe',
         'group': 'framed',
-        'mode': 02775
+        'mode': 02775,
+        'parents': False,
     })
     """
     if not os.path.exists(path):
-        os.mkdir(path, opts.get('mode', 0777)) # same default mode as Python
+        if opts.get('parents'):
+            retval = subprocess.call(['mkdir', '-p', path])
+        else:
+            os.mkdir(path, opts.get('mode', 0777)) # same default mode as Python
 
     ch_ext(path, opts)
 
