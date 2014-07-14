@@ -10,12 +10,16 @@ import itertools
 
 from contextlib import contextmanager
 
-def conn_spec():
+import mcv.util
+
+def conn_spec(overrides={}):
     """Return a connection specification with sane default values."""
-    return {'username': getpass.getuser(),
-            'port': 22,
-            'missing_host_key_policy': paramiko.AutoAddPolicy(),
-            'host_keys_path': os.path.join("~", ".ssh", "known_hosts")}
+    return mcv.util.merge_dicts(
+        {'username': getpass.getuser(),
+        'port': 22,
+        'missing_host_key_policy': paramiko.AutoAddPolicy(),
+        'host_keys_path': os.path.join("~", ".ssh", "known_hosts")},
+        overrides)
 
 @contextmanager
 def connection(connspec, verbose=False):
