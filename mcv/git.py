@@ -83,7 +83,9 @@ def export(repo_path, deploy_path, rev, opts={}):
     if not os.path.exists(deploy_path):
         mcv.file.mkdir(
             deploy_path,
-            opts={'parents': opts.get('parents', True)})
+            opts=mcv.util.merge_dicts(
+                { 'parents': True },
+                mcv.util.select_keys(opts, ['mode', 'owner', 'group'])))
 
         cmd = "git archive {rev} | tar -x -C {dir}".format(rev=rev, dir=deploy_path)
         out = subprocess.check_output(cmd, cwd=repo_path, shell=True)
