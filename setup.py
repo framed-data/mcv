@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
 setup(
     name = "mcv",
-    version = "0.5.0",
+    version = "0.5.1",
     packages = find_packages(),
     install_requires = [
         'pyyaml',
         'labrador',
         'paramiko',
-        'treant',
-        'nose'],
+        'treant'],
     author = "Elliot Block",
     author_email = "elliot@framed.io",
     description = "Spartan configuration management in Python",
