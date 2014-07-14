@@ -8,6 +8,8 @@ configuration management and deployment tasks.  Having these kinds of
 tools allows you to make your own scripts that can drop onto a target
 system and set it up as desired.
 
+[![PyPI version](https://badge.fury.io/py/mcv.svg)](http://badge.fury.io/py/mcv) ![buildstatus](https://circleci.com/gh/framed-data/mcv.png?circle-token=0a1a9394ebb8bd9537203f1daf019edfbd4c2cd1)
+
 Quickstart
 ----------
 
