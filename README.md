@@ -65,8 +65,9 @@ Design and Rationale
 
 MCV makes a few different design choices vs. other systems:
 
-- It's masterless.  You don't need to set up infrastructure in
-  order to run the infrastructure.
+- It's masterless and agentless.  You don't need to set up
+  infrastructure in order to run the infrastructure, there's
+  no daemon running on any of the coordinator or target boxes.
 
 - It's just a Python library.  You get all of the power of the
   language and libraries, with none of the mandatory abstractions
