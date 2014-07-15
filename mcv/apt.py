@@ -17,7 +17,9 @@ def _dpkg_query_local(pkg):
             output = subprocess.check_output(cmd, stderr=devnull)
         return output
     except subprocess.CalledProcessError, e:
-        return None
+        if e.returncode == 1: # package not installed
+            return None
+        raise # other errors/exceptions then actually raise
 
 def _dpkg_status(dpkg_query_output):
     """Return the status of a package given its dpkg query output
@@ -45,8 +47,7 @@ def _install(pkgs):
     if not pkgs:
         return True
 
-    retval = subprocess.call([apt_cmd, "install", "-y"] + pkgs, stdout=sys.stdout)
-    return retval
+    return subprocess.check_call([apt_cmd, "install", "-y"] + pkgs)
 
 def install(pkgs):
     installed_packages = status(pkgs)
