@@ -7,6 +7,7 @@ import tempfile
 import StringIO
 import pipes
 import itertools
+import select
 
 from contextlib import contextmanager
 
@@ -67,21 +68,7 @@ def sftp_connection(ssh_connection):
     yield sftp
     sftp.close()
 
-def _exec_command(ssh, command, bufsize=-1, timeout=None, get_pty=False):
-    """Version of paramiko.SSHClient.exec_command that also returns
-    exit status"""
-    chan = ssh._transport.open_session()
-    if get_pty:
-        chan.get_pty()
-    chan.settimeout(timeout)
-    chan.exec_command(command)
-    stdin = chan.makefile('wb', bufsize)
-    stdout = chan.makefile('r', bufsize)
-    stderr = chan.makefile_stderr('r', bufsize)
-    exit = chan.recv_exit_status()
-    return stdin, stdout, stderr, exit
-
-def execute(ssh, cmd, sudo=False, verbose='error'):
+def execute(ssh, cmd, sudo=False, stdout=sys.stdout, stderr=sys.stderr):
     """Executes a command on remote machine over SSH
 
     Takes:
@@ -101,16 +88,35 @@ def execute(ssh, cmd, sudo=False, verbose='error'):
     final_cmd = '/usr/bin/sudo /bin/sh -c {}'.format(
             pipes.quote(cmd_string)) if sudo else cmd_string
 
-    ssh_stdin, ssh_stdout, ssh_stderr, exit = _exec_command(ssh, final_cmd)
-    out = ssh_stdout.read()
-    err = ssh_stderr.read()
+    bufsize = -1
+    chan = ssh._transport.open_session()
+    chan.get_pty()
+    chan.settimeout(timeout=None)
+    chan.exec_command(final_cmd)
 
-    if verbose == True or (verbose == 'error' and exit != 0):
-        sys.stdout.write(out)
-        sys.stderr.write(err)
-        sys.stderr.write("Exited with status: {}\n".format(exit))
+    out_streams = { 'out': stdout,
+                    'err': stderr}
 
-    return (out, err, exit)
+    out_strings = { 'out': StringIO.StringIO(),
+                    'err': StringIO.StringIO() }
+    while True:
+        if chan.exit_status_ready():
+            break
+        rl, wl, xl = select.select([chan], [], [], 0.0)
+
+        if len(rl) > 0:
+            if chan.recv_ready():
+                output = chan.recv(1024)
+                out_streams['out'].write(output)
+                out_strings['out'].write(output)
+            if chan.recv_stderr_ready():
+                output = chan.recv_stderr(1024)
+                out_streams['err'].write(output)
+                out_strings['err'].write(output)
+
+    exit = chan.recv_exit_status()
+
+    return (out_strings['out'].read(), out_strings['err'].read(), exit)
 
 def _copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
@@ -130,7 +136,7 @@ def copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
     _copy(ssh, local_src, remote_dst, sudo)
 
-def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error', excludes=['.git']):
+def deploy(ssh, local_src, remote_dst, sudo=False, excludes=['.git']):
     """Copies whole directories to remote machine"""
     temp = tempfile.NamedTemporaryFile()
     exclude_pairs =[['--exclude', e] for e in excludes]
@@ -139,28 +145,24 @@ def deploy(ssh, local_src, remote_dst, sudo=False, verbose='error', excludes=['.
           [e for e in itertools.chain(*exclude_pairs)] + \
           [local_src]
 
-    if verbose == True:
-        sys.stderr.write("Tarring with: " + str(cmd) + "\n")
+    sys.stderr.write("Tarring with: " + str(cmd) + "\n")
 
     out = subprocess.check_output(cmd)
 
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('mktemp')
     remote_temppath = ssh_stdout.read().strip()
 
-    if verbose == True:
-        sys.stderr.write("Copying tarball to {}\n".format(remote_temppath))
+    sys.stderr.write("Copying tarball to {}\n".format(remote_temppath))
 
     _copy(ssh, temp.name, remote_temppath, sudo=False)
 
-    if verbose == True:
-        sys.stderr.write("Making target directory\n")
+    sys.stderr.write("Making target directory\n")
     mkdir_cmd = 'mkdir -p {}'.format(remote_dst)
 
-    out, err, exit = execute(ssh, mkdir_cmd, sudo=sudo, verbose=verbose)
+    out, err, exit = execute(ssh, mkdir_cmd, sudo=sudo)
 
     tar_cmd = 'tar -xvf {} -C {}'.format(remote_temppath, remote_dst)
 
-    if verbose == True:
-        sys.stderr.write("Extracting tar to target directory\n")
+    sys.stderr.write("Extracting tar to target directory\n")
 
-    out, err, exit = execute(ssh, tar_cmd, sudo=sudo, verbose=verbose)
+    out, err, exit = execute(ssh, tar_cmd, sudo=sudo)
