@@ -39,6 +39,21 @@ def _dpkg_status(dpkg_query_output):
     else:
         return status
 
+def _source_list_path(list_name):
+    filename = list_name if list_name.endswith('list') else list_name + ".list"
+    return '/etc/apt/sources.list.d/{}'.format(filename)
+
+def add_source_list(list_name, lines):
+    with open(_source_list_path(list_name), 'w') as f:
+        if isinstance(lines, basestring):
+            content = lines
+        else:
+            content = "".join([l + "\n" for l in lines])
+        f.write(content)
+
+def rm_source_list(list_name):
+    os.unlink(_source_list_path(list_name))
+
 def status(pkgs):
     """Return the install status of the given packages."""
     return { p:_dpkg_status(_dpkg_query_local(p)) for p in pkgs }
