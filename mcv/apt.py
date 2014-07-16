@@ -39,6 +39,16 @@ def _dpkg_status(dpkg_query_output):
     else:
         return status
 
+def key_exists(key_id, keyring='/etc/apt/trusted.gpg'):
+    out = subprocess.check_output(['gpg', '--list-keys', '--primary-keyring', keyring])
+    lines = out.split("\n")
+    return any(key_id in l for l in lines)
+
+def import_key(keyserver, key_id):
+    if not key_exists(key_id):
+        return subprocess.check_call(['apt-key', 'adv', '--keyserver', keyserver, '--recv', key_id])
+    return True
+
 def _source_list_path(list_name):
     filename = list_name if list_name.endswith('list') else list_name + ".list"
     return '/etc/apt/sources.list.d/{}'.format(filename)
