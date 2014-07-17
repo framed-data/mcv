@@ -4,6 +4,7 @@ import re
 import os
 
 apt_cmd = "/usr/bin/apt-get"
+update_cmd = [apt_cmd, 'update']
 
 # Some of the dpkg facilities are factored out so that they're usable
 # both locally here and remotely by mcv.remote.apt
@@ -80,5 +81,5 @@ def install(pkgs):
     return _install(pkgs_to_install)
 
 def update():
-    retval = subprocess.call([apt_cmd, "update"], stdout=sys.stdout)
+    retval = subprocess.call(update_cmd, stdout=sys.stdout)
     return retval
