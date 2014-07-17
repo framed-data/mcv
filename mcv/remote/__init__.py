@@ -18,7 +18,7 @@ def conn_spec(overrides={}):
     return mcv.util.merge_dicts(
         {'username': getpass.getuser(),
         'port': 22,
-        'missing_host_key_policy': paramiko.AutoAddPolicy(),
+        'missing_host_key_policy': paramiko.WarningPolicy(),
         'host_keys_path': os.path.join("~", ".ssh", "known_hosts")},
         overrides)
 
@@ -29,7 +29,7 @@ def connection(connspec, verbose=False):
     - host
     - port
     - username (default: getpass.getuser())
-    - key_file (path to private key)
+    - key_filename (path to private key)
 
     As well as 'extended' configuration for Paramiko:
     - missing_host_key_policy
