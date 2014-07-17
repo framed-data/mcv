@@ -7,6 +7,7 @@ rules by templating a rules file.
 
 import re
 import os
+import mcv.file
 
 sudoers_path = '/etc/sudoers'
 sudoers_d_path = '/etc/sudoers.d'
@@ -26,4 +27,4 @@ def add_rule_file(rule_file_name, str_content):
     file_path = os.path.join(sudoers_d_path, rule_file_name)
     with open(file_path, 'w') as f:
         f.write(str_content)
-
+    mcv.file.chmod(file_path, 0440)
