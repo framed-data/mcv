@@ -7,7 +7,10 @@ pip_cmd = "/usr/bin/pip"
 pip_list_cmd = [pip_cmd, 'freeze']
 
 def _status(pip_output):
-    return dict([l.split('==') for l in pip_output.split('\n') if l])
+    return dict([l.split('==')
+                 for l
+                 in pip_output.split('\n')
+                 if l and not l.startswith('#')])
 
 def status(pkgs):
     out = subprocess.check_output(pip_list_cmd).strip()
