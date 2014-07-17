@@ -27,3 +27,8 @@ def install(ssh, pkgs):
 
     return _install(ssh, pkgs_to_install)
 
+def update(ssh):
+    return mcv.remote.execute(
+        ssh,
+        mcv.apt.update_cmd,
+        sudo=True)
