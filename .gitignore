@@ -1,1 +1,6 @@
 *.pyc
+.vagrant
+*.vhd
+build
+dist
+mcv.egg-info
