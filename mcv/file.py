@@ -89,3 +89,8 @@ def link(source, link_name, force=False):
         os.symlink(source, link_name)
     else:
         os.symlink(source, link_name)
+
+def unlink(path):
+    """Idempotent unlink"""
+    if os.path.exists(path):
+        os.unlink(path)
