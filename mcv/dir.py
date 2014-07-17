@@ -52,6 +52,10 @@ def _opts(tree_path):
     tpath_opts = [treant.attrs(node) for node in tree_path]
     return mcv.util.merge_dicts(*tpath_opts)
 
+def root_path(tree):
+    """Returns the root path of a tree, assumed to just be its value."""
+    return treant.value(tree)
+
 def subpath(tree, search_name, *subpaths):
     """Find a node in the tree and return a subpath thereof.
 
