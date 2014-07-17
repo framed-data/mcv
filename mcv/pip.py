@@ -4,10 +4,10 @@ import re
 import os
 
 pip_cmd = "/usr/bin/pip"
-pip_list_cmd = [pip_cmd, 'list']
+pip_list_cmd = [pip_cmd, 'freeze']
 
 def _status(pip_output):
-    return dict([l.split() for l in pip_output.split('\n') if l])
+    return dict([l.split('==') for l in pip_output.split('\n') if l])
 
 def status(pkgs):
     out = subprocess.check_output(pip_list_cmd).strip()
