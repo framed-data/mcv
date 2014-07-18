@@ -72,9 +72,19 @@ def fetch(repo_path, key_path, ssh_opts={}):
             stderr=sys.stderr,
             env=env)
 
-def current_rev(repo_path):
-    """Return the current revision of the repo at local `repo_path`"""
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo_path).strip()
+def _show_ref(repo_path):
+    return subprocess.check_output(['git', 'show-ref'], cwd=repo_path)
+
+def _refs(show_ref_output):
+    lines = map(lambda l: l.split(), show_ref_output.strip().split('\n'))
+    return dict([[ref, commit] for commit, ref in lines])
+
+def refs(repo_path):
+    return _refs(_show_ref(repo_path))
+
+def current_rev(repo_path, ref='refs/remotes/origin/master'):
+    """Return the commit ID of a ref, usually to find the latest commit ID"""
+    return refs(repo_path)[ref]
 
 def export(repo_path, deploy_path, rev, opts={}):
     """Export a copy of the contents of the git repo
