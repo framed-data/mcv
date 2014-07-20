@@ -57,7 +57,7 @@ def mkfs(dev, dst_fstype, opts, force=False, verbose='error'):
         cmd = [mkfs_path, '-t', dst_fstype] + ([opts] if opts else []) + [dev]
         status = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
         if status != 0:
-            sys.stderr.write("Creating filesystem %s on device '%s' failed" % (fstype,dev))
+            sys.stderr.write("Creating filesystem %s on device '%s' failed" % (dst_fstype,dev))
             return False
         return True
 
