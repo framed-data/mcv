@@ -107,14 +107,65 @@ def set_mount(args_in):
     with open("/etc/fstab", 'w') as f:
         f.write(output)
 
-def mount(name):
+def mount(name, remount=False):
     """ mount up a path or remount if needed """
+    cmd = None
     if os.path.ismount(name):
-        cmd = [ mount_path, '-o', 'remount', name ]
+        if remount:
+            cmd = [ mount_path, '-o', 'remount', name ]
     else:
         cmd = [ mount_path, name ]
 
-    return subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    if cmd:
+        return subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    else:
+        return None
+
+def _parse_mount_opts(s):
+    opt_strings = s.split(',')
+    opt_kv_pairs = [o.split('=') if '=' in o else [o, True] for o in opt_strings]
+    return dict(opt_kv_pairs)
+
+def _parse_mount_row(row_string):
+    """Parse a row of /proc/mounts output into a nested dict
+    {'dev': ...,
+     'mount': ...,
+     'opts': ...,}
+    """
+    dev, mnt, fs, opts_str, _, _ = row_string.split()
+    return {
+        'dev': dev,
+        'mnt': mnt,
+        'fs': fs,
+        'opts': _parse_mount_opts(opts_str)}
+
+def _parse_proc_mounts(mounts_output):
+    """Return a list of mount data rows, given /proc/mounts output
+
+    See `mount_status` for struture details.
+    """
+    return [_parse_mount_row(r) for r in mounts_output.split('\n')]
+
+def mount_status(path='/proc/mounts'):
+    """Return a list of mount data rows, reading /proc/mounts to get data.
+
+    Each row is a list of columns
+    [device, mount_point, fstype_, opts]
+
+    Where opts is a list of mount optons, supporting either a string options,
+    or a 2-tuple (key, value) pair.
+    [opt0, opt1, [opt2key, opt2value], opt3]
+    """
+    with open(path, 'r') as f:
+        mounts_output = f.read().strip()
+
+    return _parse_proc_mounts(mounts_output)
+
+def _mounted(mounts, mount):
+    return any([m['mnt'] == mount for m in mounts])
+
+def mounted(mount):
+    return _mounted(mount_status(), mount)
 
 def umount(name):
     """ unmount a path """
