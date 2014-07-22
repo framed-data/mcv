@@ -107,14 +107,19 @@ def set_mount(args_in):
     with open("/etc/fstab", 'w') as f:
         f.write(output)
 
-def mount(name):
+def mount(name, remount=False):
     """ mount up a path or remount if needed """
+    cmd = None
     if os.path.ismount(name):
-        cmd = [ mount_path, '-o', 'remount', name ]
+        if remount:
+            cmd = [ mount_path, '-o', 'remount', name ]
     else:
         cmd = [ mount_path, name ]
 
-    return subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    if cmd:
+        return subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    else:
+        return None
 
 def umount(name):
     """ unmount a path """
