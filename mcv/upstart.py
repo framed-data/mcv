@@ -11,10 +11,10 @@ def status(service_name):
 
 def start(service_name, restart=False):
     """Idempotent Upstart start"""
-    _, status, _ = status(service_name)
+    _, service_status, _ = status(service_name)
 
     action = None
-    if status == 'start/running' and restart:
+    if service_status == 'start/running' and restart:
         action = 'restart'
     else:
         action = 'start'
