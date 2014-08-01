@@ -5,15 +5,11 @@ env_file = '/etc/environment'
 def parse_environment_file():
     """Return a list of (name, value) tuples representing the env vars in
     /etc/environment."""
-    comment = re.compile(r'#.*$')
-    assign  = re.compile(r'^(\w+)=(.*)$')
     with open(env_file, 'r') as efile:
-        envvars = []
-        for line in efile:
-            line = comment.sub('', line).strip()
-            m = assign.match(line)
-            if m: envvars.append(m.groups())
-        return envvars
+        raw_lines = efile.readlines()
+        lines = [ re.sub(r'#.*$', '', line).strip() for line in raw_lines ]
+        matches = [ re.match(r'^(\w+)=(.*)$', line) for line in lines ]
+        return { m.group(1): m.group(2) for m in matches if m }
 
 def append_env_setting(name, value):
     """Append the given variable to /etc/environment."""
@@ -22,7 +18,6 @@ def append_env_setting(name, value):
 
 def add_environment_var(name, value):
     """Idempotently add a variable to /etc/environment."""
-    env_vars = parse_environment_file()
-    var_names = [ var[0] for var in env_vars ]
-    if name not in var_names:
+    env = parse_environment_file()
+    if name not in env:
         append_env_setting(name, value)
