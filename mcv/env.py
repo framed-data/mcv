@@ -1,4 +1,6 @@
 import re
+from contextlib import contextmanager
+import os
 
 env_file = '/etc/environment'
 
@@ -21,3 +23,13 @@ def add_environment_var(name, value):
     env = parse_environment_file()
     if name not in env:
         append_env_setting(name, value)
+
+@contextmanager
+def context(env_mappings, clear=False):
+    e0 = os.environ.copy()
+    if clear:
+        os.environ.clear()
+    os.environ.update(env_mappings)
+    yield os.environ
+    os.environ.clear()
+    os.environ.update(e0)
