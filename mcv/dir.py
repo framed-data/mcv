@@ -99,10 +99,16 @@ def _mktree(tree):
 
     return zip(paths, opts)
 
-def mktree(tree):
+def mktree(tree, pred=lambda opts: True):
     """Given a tree, make all the directories in the tree
     recursively, with opts applied hiearchically, i.e. opts specified
     at a node also get applied to subnodes (unless later
-    overridden)"""
+    overridden)
+
+    Optionally accepts a `pred`icate function that takes
+    an options dict for each node, and returns boolean
+    whether that node should be created.
+    """
     for path, opts in _mktree(tree):
-        mcv.file.mkdir(path, opts=opts)
+        if pred(opts):
+            mcv.file.mkdir(path, opts=opts)
