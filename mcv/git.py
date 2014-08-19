@@ -50,14 +50,19 @@ def repo_exists(path, verbose='error'):
                 stderr=stderr)
     return retval == 0
 
-def clone(repo_url, repo_path, key_path, ssh_opts={}):
+def clone(repo_url, repo_path, key_path=None, ssh_opts={}):
     """Clone git repo from remote `repo_url` to local `repo_path`
 
     Takes a path to an SSH private key file, and an dictionary
     of ssh -o options, as explained in man for ssh_config(5)"""
     if not repo_exists(repo_path):
-        with git_ssh_env(key_path, opts=ssh_opts) as env:
-            retval = subprocess.call(['git', 'clone', repo_url, repo_path], env=env)
+        cmd = ['git', 'clone', repo_url, repo_path]
+        if key_path:
+            with git_ssh_env(key_path, opts=ssh_opts) as env:
+                return subprocess.call(cmd, env=env)
+        else:
+            return subprocess.call(cmd)
+
 
 def fetch(repo_path, key_path, ssh_opts={}):
     """Fetch a local git repo at path `repo_path`
