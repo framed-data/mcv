@@ -8,7 +8,7 @@ def _make_params(params):
     list of words ready to be passed to an `aws cloudformation` command,
     including the `--parameters` word at the beginning."""
     return [ "--parameters" ] \
-         + [ "ParameterKey=%s,ParameterValue=%s" % (k, params[k])
+         + [ "ParameterKey={},ParameterValue={}".format(k, params[k])
                  for k in params ]
 
 def _create_or_update(command, template, stack_name, params, quiet, noop):
@@ -21,11 +21,11 @@ def _create_or_update(command, template, stack_name, params, quiet, noop):
           ] + params
     cmd_str = " ".join(cmd)
     if noop and not quiet:
-        print "If --noop had not been specified, I would execute this command:"
-        print cmd_str
+        print("If --noop had not been specified, I would execute this command:")
+        print(cmd_str)
     elif not quiet:
-        print "I am about to execute this aws command:"
-        print cmd_str
+        print("I am about to execute this aws command:")
+        print(cmd_str)
     if not noop:
         subprocess.call(cmd)
 
