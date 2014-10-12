@@ -13,14 +13,16 @@ from contextlib import contextmanager
 
 import mcv.util
 
+
 def conn_spec(overrides={}):
     """Return a connection specification with sane default values."""
     return mcv.util.merge_dicts(
         {'username': getpass.getuser(),
-        'port': 22,
-        'missing_host_key_policy': paramiko.WarningPolicy(),
-        'host_keys_path': os.path.join("~", ".ssh", "known_hosts")},
+         'port': 22,
+         'missing_host_key_policy': paramiko.WarningPolicy(),
+         'host_keys_path': os.path.join("~", ".ssh", "known_hosts")},
         overrides)
+
 
 @contextmanager
 def connection(connspec, verbose=False):
@@ -49,7 +51,7 @@ def connection(connspec, verbose=False):
 
     if verbose:
         sys.stderr.write(
-                "Connecting to {user}@{host}:{port}...".format(
+            "Connecting to {user}@{host}:{port}...".format(
                 user=connspec['username'],
                 host=host,
                 port=connspec['port']))
@@ -62,11 +64,13 @@ def connection(connspec, verbose=False):
     yield ssh
     ssh.close()
 
+
 @contextmanager
 def sftp_connection(ssh_connection):
     sftp = ssh_connection.open_sftp()
     yield sftp
     sftp.close()
+
 
 def execute(ssh, cmd, sudo=False, stdout=sys.stdout, stderr=sys.stderr):
     """Executes a command on remote machine over SSH
@@ -86,7 +90,7 @@ def execute(ssh, cmd, sudo=False, stdout=sys.stdout, stderr=sys.stderr):
     cmd_string = cmd if isinstance(cmd, basestring) else ' '.join(cmd)
 
     final_cmd = '/usr/bin/sudo /bin/sh -c {}'.format(
-            pipes.quote(cmd_string)) if sudo else cmd_string
+        pipes.quote(cmd_string)) if sudo else cmd_string
 
     bufsize = -1
     chan = ssh._transport.open_session()
@@ -94,11 +98,11 @@ def execute(ssh, cmd, sudo=False, stdout=sys.stdout, stderr=sys.stderr):
     chan.settimeout(timeout=None)
     chan.exec_command(final_cmd)
 
-    out_streams = { 'out': stdout,
-                    'err': stderr}
+    out_streams = {'out': stdout,
+                   'err': stderr}
 
-    out_strings = { 'out': StringIO.StringIO(),
-                    'err': StringIO.StringIO() }
+    out_strings = {'out': StringIO.StringIO(),
+                   'err': StringIO.StringIO()}
     while True:
         if chan.exit_status_ready():
             break
@@ -118,6 +122,7 @@ def execute(ssh, cmd, sudo=False, stdout=sys.stdout, stderr=sys.stderr):
 
     return (out_strings['out'].read(), out_strings['err'].read(), exit)
 
+
 def _copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
     if sudo:
@@ -132,14 +137,16 @@ def _copy(ssh, local_src, remote_dst, sudo=False):
         with sftp_connection(ssh) as sftp:
             sftp.put(local_src, remote_dst)
 
+
 def copy(ssh, local_src, remote_dst, sudo=False):
     """Copies individual files"""
     _copy(ssh, local_src, remote_dst, sudo)
 
+
 def deploy(ssh, local_src, remote_dst, sudo=False, excludes=['.git']):
     """Copies whole directories to remote machine"""
     temp = tempfile.NamedTemporaryFile()
-    exclude_pairs =[['--exclude', e] for e in excludes]
+    exclude_pairs = [['--exclude', e] for e in excludes]
 
     cmd = ['/bin/tar', '-cvf', temp.name] + \
           [e for e in itertools.chain(*exclude_pairs)] + \
