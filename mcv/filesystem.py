@@ -13,6 +13,7 @@ sgdisk_path = "/sbin/sgdisk"
 mount_path = "/bin/mount"
 umount_path = "/bin/umount"
 
+
 def partition(dev):
     """Partition an empty disk drive to have exactly 1 partition
     on it filling the whole space."""
@@ -23,12 +24,13 @@ def partition(dev):
     # 1. parse `parted -lm` output
     # 2. investigate not-super-publicly-accessible `pyparted` RedHat package
 
-    if os.path.exists(dev + "1"): #e.g. /dev/sdb -> /dev/sdb1
+    if os.path.exists(dev + "1"):  # e.g. /dev/sdb -> /dev/sdb1
         return None
 
     cmd = [sgdisk_path, dev, "-N", str(1)]
     status = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
     return status
+
 
 def mkfs(dev, dst_fstype, opts, force=False, verbose='error'):
     if not os.path.exists(dev):
@@ -53,13 +55,15 @@ def mkfs(dev, dst_fstype, opts, force=False, verbose='error'):
         sys.stderr.write(msg)
         return False
 
-    else: # actually make the filesystem
+    else:  # actually make the filesystem
         cmd = [mkfs_path, '-t', dst_fstype] + ([opts] if opts else []) + [dev]
         status = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
         if status != 0:
-            sys.stderr.write("Creating filesystem %s on device '%s' failed" % (dst_fstype,dev))
+            msg_template = "Creating filesystem %s on device '%s' failed"
+            sys.stderr.write(msg_template. format(dst_fstype, dev))
             return False
         return True
+
 
 def _set_mount(fstab_in, args_in):
     """ set/change a mount point location in fstab """
@@ -87,6 +91,7 @@ def _set_mount(fstab_in, args_in):
 
     return "".join([' '.join(l) + "\n" for l in lines])
 
+
 def set_mount(args_in):
     """Sets up a mount in /etc/fstab
 
@@ -107,24 +112,29 @@ def set_mount(args_in):
     with open("/etc/fstab", 'w') as f:
         f.write(output)
 
+
 def mount(name, remount=False):
     """ mount up a path or remount if needed """
     cmd = None
     if os.path.ismount(name):
         if remount:
-            cmd = [ mount_path, '-o', 'remount', name ]
+            cmd = [mount_path, '-o', 'remount', name]
     else:
-        cmd = [ mount_path, name ]
+        cmd = [mount_path, name]
 
     if cmd:
         return subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr)
     else:
         return None
 
+
 def _parse_mount_opts(s):
     opt_strings = s.split(',')
-    opt_kv_pairs = [o.split('=') if '=' in o else [o, True] for o in opt_strings]
+    opt_kv_pairs = [o.split('=') if '=' in o
+                    else [o, True]
+                    for o in opt_strings]
     return dict(opt_kv_pairs)
+
 
 def _parse_mount_row(row_string):
     """Parse a row of /proc/mounts output into a nested dict
@@ -139,12 +149,14 @@ def _parse_mount_row(row_string):
         'fs': fs,
         'opts': _parse_mount_opts(opts_str)}
 
+
 def _parse_proc_mounts(mounts_output):
     """Return a list of mount data rows, given /proc/mounts output
 
     See `mount_status` for struture details.
     """
     return [_parse_mount_row(r) for r in mounts_output.split('\n')]
+
 
 def mount_status(path='/proc/mounts'):
     """Return a list of mount data rows, reading /proc/mounts to get data.
@@ -161,12 +173,17 @@ def mount_status(path='/proc/mounts'):
 
     return _parse_proc_mounts(mounts_output)
 
+
 def _mounted(mounts, mount):
     return any([m['mnt'] == mount for m in mounts])
+
 
 def mounted(mount):
     return _mounted(mount_status(), mount)
 
+
 def umount(name):
     """ unmount a path """
-    return subprocess.call([umount_path, name], stdout=sys.stdout, stderr=sys.stderr)
+    return subprocess.call([umount_path, name],
+                           stdout=sys.stdout,
+                           stderr=sys.stderr)
