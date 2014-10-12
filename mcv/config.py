@@ -7,12 +7,13 @@ to a target host and used to bootstrap configuration thereof.
 E.g. if a host `webserver.my.com` should know that it has
 
 {'role': 'web'}
- 
+
 Then configloader('webserver.my.com') should return that dict
 above.
 """
 
 import yaml
+
 
 class ConfigLoader:
     def __init__(self, path):
