@@ -1,13 +1,16 @@
 import subprocess
 import re
 
+
 def status(service_name):
     """Query Upstart status"""
     output = subprocess.check_output(['status', service_name])
-    r = re.compile('(?P<service>\S+) (?P<status>[\w/]+)(, process (?P<proc>\d+))?')
+    re_tmpl = '(?P<service>\S+) (?P<status>[\w/]+)(, process (?P<proc>\d+))?'
+    r = re.compile(re_tmpl)
     m = r.match(output)
     service, status, _, pid = m.groups()
     return [service, status, pid]
+
 
 def start(service_name, restart=False):
     """Idempotent Upstart start"""
