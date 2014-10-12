@@ -12,6 +12,7 @@ import tempfile
 
 opt_keys = ['owner', 'group', 'mode']
 
+
 def chmod(path, mode, recursive=False):
     if not mode:
         return
@@ -20,6 +21,7 @@ def chmod(path, mode, recursive=False):
         return os.chmod(path, mode)
     else:
         return subprocess.call(['chmod', '-R', "{0:o}".format(mode), path])
+
 
 def chown(path, owner=None, group=None, recursive=False):
     if owner:
@@ -42,6 +44,7 @@ def chown(path, owner=None, group=None, recursive=False):
         else:
             subprocess.call(['chgrp', '-R', str(gid), path])
 
+
 def ch_ext(path, opts={}):
     """Change extended file attributes:
 
@@ -51,6 +54,7 @@ def ch_ext(path, opts={}):
     recursive = opts.get('recursive', False)
     chmod(path, opts.get('mode'), recursive=recursive)
     chown(path, opts.get('owner'), opts.get('group'), recursive=recursive)
+
 
 def mkdir(path, opts={}):
     """Idempotent mkdir
@@ -66,9 +70,10 @@ def mkdir(path, opts={}):
         if opts.get('parents'):
             retval = subprocess.call(['mkdir', '-p', path])
         else:
-            os.mkdir(path, opts.get('mode', 0777)) # same default mode as Python
+            os.mkdir(path, opts.get('mode', 0777))  # use Python's default mode
 
     ch_ext(path, opts)
+
 
 def link(source, link_name, force=False):
     """Creates symlink at `link_name` pointing at `source`.
@@ -84,11 +89,12 @@ def link(source, link_name, force=False):
         tmp_link = os.path.join(tmppath, 'link')
         os.symlink(source, tmp_link)
         subprocess.call(['mv', '-T', tmp_link, link_name])
-    elif os.path.lexists(link_name) and force == True:
+    elif os.path.lexists(link_name) and force is True:
         os.unlink(link_name)
         os.symlink(source, link_name)
     else:
         os.symlink(source, link_name)
+
 
 def unlink(path):
     """Idempotent unlink"""

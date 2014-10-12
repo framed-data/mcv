@@ -6,16 +6,19 @@ import os
 pip_cmd = "/usr/bin/pip"
 pip_list_cmd = [pip_cmd, 'freeze']
 
+
 def _status(pip_output):
     return dict([l.split('==')
                  for l
                  in pip_output.split('\n')
                  if l and not l.startswith('#')])
 
+
 def status(pkgs):
     out = subprocess.check_output(pip_list_cmd).strip()
     installed = _status(out)
-    return { p:installed.get(p) for p in pkgs }
+    return {p: installed.get(p) for p in pkgs}
+
 
 def _install_cmd(pkgs, upgrade=False):
     if not pkgs:
@@ -24,6 +27,7 @@ def _install_cmd(pkgs, upgrade=False):
     opt_upgrade = ['--upgrade'] if upgrade else []
 
     return [pip_cmd, 'install'] + opt_upgrade + pkgs
+
 
 def install(pkgs, upgrade=False):
     installed_packages = status(pkgs)
