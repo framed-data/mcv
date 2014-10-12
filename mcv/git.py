@@ -8,8 +8,10 @@ import tempfile
 from contextlib import contextmanager
 import itertools
 
+
 def lines_to_string(lines):
     return "".join(" ".join(l) + "\n" for l in lines)
+
 
 @contextmanager
 def git_ssh_env(key_path, opts={}):
@@ -34,6 +36,7 @@ def git_ssh_env(key_path, opts={}):
     env['GIT_SSH'] = f.name
     yield env
 
+
 def repo_exists(path, verbose='error'):
     if not os.path.exists(path):
         return False
@@ -43,12 +46,9 @@ def repo_exists(path, verbose='error'):
         stdout = sys.stdout if verbose is True else devnull
         stderr = sys.stderr if verbose is True else devnull
 
-        retval = subprocess.call(
-                cmd,
-                cwd=path,
-                stdout=stdout,
-                stderr=stderr)
+        retval = subprocess.call(cmd, cwd=path, stdout=stdout, stderr=stderr)
     return retval == 0
+
 
 def clone(repo_url, repo_path, key_path=None, ssh_opts={}):
     """Clone git repo from remote `repo_url` to local `repo_path`
@@ -77,19 +77,24 @@ def fetch(repo_path, key_path, ssh_opts={}):
             stderr=sys.stderr,
             env=env)
 
+
 def _show_ref(repo_path):
     return subprocess.check_output(['git', 'show-ref'], cwd=repo_path)
+
 
 def _refs(show_ref_output):
     lines = map(lambda l: l.split(), show_ref_output.strip().split('\n'))
     return dict([[ref, commit] for commit, ref in lines])
 
+
 def refs(repo_path):
     return _refs(_show_ref(repo_path))
+
 
 def current_rev(repo_path, ref='refs/remotes/origin/master'):
     """Return the commit ID of a ref, usually to find the latest commit ID"""
     return refs(repo_path)[ref]
+
 
 def export(repo_path, deploy_path, rev, opts={}):
     """Export a copy of the contents of the git repo
@@ -99,14 +104,15 @@ def export(repo_path, deploy_path, rev, opts={}):
         mcv.file.mkdir(
             deploy_path,
             opts=mcv.util.merge_dicts(
-                { 'parents': True },
+                {'parents': True},
                 mcv.util.select_keys(opts, ['mode', 'owner', 'group'])))
 
-        cmd = "git archive {rev} | tar -x -C {dir}".format(rev=rev, dir=deploy_path)
+        cmd_tmpl = "git archive {rev} | tar -x -C {dir}"
+        cmd = cmd_tmpl.format(rev=rev, dir=deploy_path)
         out = subprocess.check_output(cmd, cwd=repo_path, shell=True)
         mcv.file.ch_ext(
             deploy_path,
             mcv.util.merge_dicts(
-                { 'recursive': True },
+                {'recursive': True},
                 mcv.util.select_keys(opts, ['owner', 'group'])))
         return out
