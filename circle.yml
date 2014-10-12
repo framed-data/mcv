@@ -1,3 +1,5 @@
 test:
   override:
     - nosetests
+    - pep8 mcv/*.py mcv/**/*.py
+    - pep8 tests/*.py
