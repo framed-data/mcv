@@ -6,10 +6,12 @@ import os
 
 pip_cmd = "/usr/bin/pip"
 
+
 def status(ssh, pkgs):
     out, err, exit = mcv.remote.execute(ssh, mcv.pip.pip_list_cmd)
     installed = mcv.pip._status(out)
-    return { p:installed.get(p) for p in pkgs }
+    return {p: installed.get(p) for p in pkgs}
+
 
 def install(ssh, pkgs, sudo=False, upgrade=False):
     installed_packages = status(ssh, pkgs)
