@@ -6,10 +6,12 @@ import os
 apt_cmd = "/usr/bin/apt-get"
 update_cmd = [apt_cmd, 'update']
 
+
 # Some of the dpkg facilities are factored out so that they're usable
 # both locally here and remotely by mcv.remote.apt
 def _dpkg_query_cmd(pkg):
     return ["/usr/bin/dpkg-query", "-W", "-f", "'${Status}'", pkg]
+
 
 def _dpkg_query_local(pkg):
     cmd = _dpkg_query_cmd(pkg)
@@ -18,9 +20,10 @@ def _dpkg_query_local(pkg):
             output = subprocess.check_output(cmd, stderr=devnull)
         return output
     except subprocess.CalledProcessError, e:
-        if e.returncode == 1: # package not installed
+        if e.returncode == 1:  # package not installed
             return None
-        raise # other errors/exceptions then actually raise
+        raise  # other errors/exceptions then actually raise
+
 
 def _dpkg_status(dpkg_query_output):
     """Return the status of a package given its dpkg query output
@@ -40,19 +43,27 @@ def _dpkg_status(dpkg_query_output):
     else:
         return status
 
+
 def key_exists(key_id, keyring='/etc/apt/trusted.gpg'):
-    out = subprocess.check_output(['gpg', '--list-keys', '--primary-keyring', keyring])
+    out = subprocess.check_output(['gpg', '--list-keys', '--primary-keyring',
+                                  keyring])
     lines = out.split("\n")
     return any(key_id in l for l in lines)
 
+
 def import_key(keyserver, key_id):
     if not key_exists(key_id):
-        return subprocess.check_call(['apt-key', 'adv', '--keyserver', keyserver, '--recv', key_id])
+        return subprocess.check_call(['apt-key', 'adv', '--keyserver',
+                                      keyserver,
+                                      '--recv',
+                                      key_id])
     return True
+
 
 def _source_list_path(list_name):
     filename = list_name if list_name.endswith('list') else list_name + ".list"
     return '/etc/apt/sources.list.d/{}'.format(filename)
+
 
 def add_source_list(list_name, lines):
     with open(_source_list_path(list_name), 'w') as f:
@@ -62,12 +73,15 @@ def add_source_list(list_name, lines):
             content = "".join([l + "\n" for l in lines])
         f.write(content)
 
+
 def rm_source_list(list_name):
     os.unlink(_source_list_path(list_name))
 
+
 def status(pkgs):
     """Return the install status of the given packages."""
-    return { p:_dpkg_status(_dpkg_query_local(p)) for p in pkgs }
+    return {p: _dpkg_status(_dpkg_query_local(p)) for p in pkgs}
+
 
 def _install(pkgs):
     if not pkgs:
@@ -75,10 +89,12 @@ def _install(pkgs):
 
     return subprocess.check_call([apt_cmd, "install", "-y"] + pkgs)
 
+
 def install(pkgs):
     installed_packages = status(pkgs)
     pkgs_to_install = [p for p in pkgs if not installed_packages[p]]
     return _install(pkgs_to_install)
+
 
 def update():
     retval = subprocess.call(update_cmd, stdout=sys.stdout)
