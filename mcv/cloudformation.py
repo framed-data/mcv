@@ -11,9 +11,10 @@ def _make_params(params):
          + [ "ParameterKey={},ParameterValue={}".format(k, params[k])
                  for k in params ]
 
-def _create_or_update(command, template, stack_name, params, quiet, noop):
+def create_or_update(verb, template, stack_name, params, quiet, noop):
     template_url = "file://" + os.path.abspath(template)
     params = _make_params(params)
+    command = 'create-stack' if verb == 'create' else 'update-stack'
     cmd = [ 'aws', 'cloudformation', command,
             "--stack-name", stack_name,
             "--template-body", template_url,
@@ -28,9 +29,3 @@ def _create_or_update(command, template, stack_name, params, quiet, noop):
         print(cmd_str)
     if not noop:
         subprocess.call(cmd)
-
-def create_stack(*args):
-    _create_or_update('create-stack', *args)
-
-def update_stack(*args):
-    _create_or_update('update-stack', *args)
