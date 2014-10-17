@@ -11,6 +11,26 @@ def _make_params(params):
          + [ "ParameterKey={},ParameterValue={}".format(k, params[k])
                  for k in params ]
 
+
+def check_template(template, verbose=False):
+    template_url = "file://" + os.path.abspath(template)
+    cmd = ['aws', 'cloudformation', 'validate-template',
+           "--template-body", template_url]
+    cmd_str = " ".join(cmd)
+
+    if verbose:
+        print("I am about to execute this aws command:")
+        print(cmd_str)
+
+    # The command will output to STDOUT if successful, and STDERR if
+    # unsuccessful, but we want neither output to be seen by the user.
+    try:
+        subprocess.check_output(cmd)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
 def create_or_update(verb, template, stack_name, params, quiet, noop):
     template_url = "file://" + os.path.abspath(template)
     params = _make_params(params)
