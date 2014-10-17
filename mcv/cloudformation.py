@@ -13,7 +13,6 @@ def _make_params(params):
             for k in params]
 
 
-
 def check_template(template, verbose=False):
     template_url = "file://" + os.path.abspath(template)
     cmd = ['aws', 'cloudformation', 'validate-template',
@@ -43,8 +42,7 @@ def create_or_update(verb, template, stack_name, params, quiet, noop):
            "--capabilities", "CAPABILITY_IAM"] + params
     cmd_str = " ".join(cmd)
     if noop and not quiet:
-        print("If --noop had not been specified, " +
-              "I would execute this command:")
+        print("If noop had not been specified, I would execute this command:")
         print(cmd_str)
     elif not quiet:
         print("I am about to execute this aws command:")
