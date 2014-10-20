@@ -6,6 +6,7 @@ import json
 
 aws_cmd = "/usr/local/bin/aws"
 
+
 def has_key_pair(key_pair, require=False):
     with open("/dev/null", 'w') as devnull:
         cmd = [aws_cmd, "ec2", "describe-key-pairs", "--key-names", key_pair]
@@ -21,13 +22,14 @@ Perhaps the key-pair does not exist, or you do not have access to it?
         sys.exit(1)
     return success
 
+
 def has_bucket(bucket, require=False):
     with open("/dev/null", 'w') as devnull:
         cmd = [aws_cmd, 's3api', 'list-buckets']
         output = subprocess.check_output(cmd, stderr=devnull)
     buckets = json.loads(output)['Buckets']
-    bkt_names = [ bkt['Name'] for bkt in buckets ]
-    success =  bucket in bkt_names
+    bkt_names = [bkt['Name'] for bkt in buckets]
+    success = bucket in bkt_names
 
     if require and not success:
         print("""
@@ -37,6 +39,7 @@ def has_bucket(bucket, require=False):
     """.strip().format(bucket))
         sys.exit(1)
     return success
+
 
 def has_s3_object(bucket, path, require=False):
     s3_obj = "s3://{}/{}".format(bucket, path.lstrip("/"))
