@@ -13,7 +13,6 @@ def _make_params(params):
             for k in params]
 
 
-
 def check_template(template, verbose=False):
     template_url = "file://" + os.path.abspath(template)
     cmd = ['aws', 'cloudformation', 'validate-template',
@@ -42,12 +41,31 @@ def create_or_update(verb, template, stack_name, params, quiet, noop):
            "--template-body", template_url,
            "--capabilities", "CAPABILITY_IAM"] + params
     cmd_str = " ".join(cmd)
+
     if noop and not quiet:
-        print("If --noop had not been specified, " +
-              "I would execute this command:")
+        print("If noop had not been specified, I would execute this command:")
         print(cmd_str)
     elif not quiet:
         print("I am about to execute this aws command:")
         print(cmd_str)
+    if not noop:
+        subprocess.call(cmd)
+
+
+def destroy(stack_name, quiet=False, noop=False):
+    cmd = ['aws', 'cloudformation', 'delete-stack',
+           "--stack-name", stack_name]
+    cmd_str = " ".join(cmd)
+
+    if noop and not quiet:
+        print("If noop had not been specified, I would execute this command:")
+        print(cmd_str)
+    elif not quiet:
+        print("I am about to execute this aws command:")
+        print(cmd_str)
+        print("\nNote that you will have no indication of whether")
+        print("the command was successful, but if you want to check")
+        print("on it afterwards, run the following command:")
+        print("aws cloudformation describe-stacks --stack-name " + stack_name)
     if not noop:
         subprocess.call(cmd)
