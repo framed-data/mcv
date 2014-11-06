@@ -40,11 +40,7 @@ def get_stack_status(stack_name):
     return subprocess.check_output(cmd).strip().strip('"')
 
 
-def wait_for_created_or_updated(verb, stack_name):
-    sys.stdout.write("Waiting for stack " + stack_name +
-                     " to be " + verb + "d.")
-    sys.stdout.flush()
-    desired_status = verb.upper() + '_COMPLETE'
+def wait_for_stack_status(stack_name, desired_status):
     while (get_stack_status(stack_name) != desired_status):
         time.sleep(5)
         sys.stdout.write('.')
@@ -52,14 +48,18 @@ def wait_for_created_or_updated(verb, stack_name):
     sys.stdout.write('\n')
 
 
+def wait_for_created_or_updated(verb, stack_name):
+    sys.stdout.write("Waiting for stack " + stack_name +
+                     " to be " + verb + "d.")
+    sys.stdout.flush()
+    desired_status = verb.upper() + '_COMPLETE'
+    wait_for_stack_status(stack_name, desired_status)
+
+
 def wait_for_destroyed(stack_name):
     sys.stdout.write("Waiting for stack " + stack_name + " to be destroyed.")
     sys.stdout.flush()
-    while (get_stack_status(stack_name) != ''):
-        time.sleep(5)
-        sys.stdout.write('.')
-        sys.stdout.flush()
-    sys.stdout.write('\n')
+    wait_for_stack_status(stack_name, '')
 
 
 def create_or_update(verb, template, stack_name, params, quiet, noop, wait):
