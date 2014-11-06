@@ -2,6 +2,8 @@
 
 import os.path
 import subprocess
+import sys
+import time
 
 
 def _make_params(params):
@@ -32,7 +34,35 @@ def check_template(template, verbose=False):
         return False
 
 
-def create_or_update(verb, template, stack_name, params, quiet, noop):
+def get_stack_status(stack_name):
+    query = "Stacks[?StackName==`" + stack_name + "`].StackStatus | [0]"
+    cmd = ['aws', 'cloudformation', 'describe-stacks', "--query", query]
+    return subprocess.check_output(cmd).strip().strip('"')
+
+
+def wait_for_stack_status(stack_name, desired_status):
+    while (get_stack_status(stack_name) != desired_status):
+        time.sleep(5)
+        sys.stdout.write('.')
+        sys.stdout.flush()
+    sys.stdout.write('\n')
+
+
+def wait_for_created_or_updated(verb, stack_name):
+    sys.stdout.write("Waiting for stack " + stack_name +
+                     " to be " + verb + "d.")
+    sys.stdout.flush()
+    desired_status = verb.upper() + '_COMPLETE'
+    wait_for_stack_status(stack_name, desired_status)
+
+
+def wait_for_destroyed(stack_name):
+    sys.stdout.write("Waiting for stack " + stack_name + " to be destroyed.")
+    sys.stdout.flush()
+    wait_for_stack_status(stack_name, '')
+
+
+def create_or_update(verb, template, stack_name, params, quiet, noop, wait):
     template_url = "file://" + os.path.abspath(template)
     params = _make_params(params)
     command = 'create-stack' if verb == 'create' else 'update-stack'
@@ -50,9 +80,11 @@ def create_or_update(verb, template, stack_name, params, quiet, noop):
         print(cmd_str)
     if not noop:
         subprocess.call(cmd)
+        if wait:
+            wait_for_created_or_updated(verb, stack_name)
 
 
-def destroy(stack_name, quiet=False, noop=False):
+def destroy(stack_name, quiet=False, noop=False, wait=False):
     cmd = ['aws', 'cloudformation', 'delete-stack',
            "--stack-name", stack_name]
     cmd_str = " ".join(cmd)
@@ -69,3 +101,5 @@ def destroy(stack_name, quiet=False, noop=False):
         print("aws cloudformation describe-stacks --stack-name " + stack_name)
     if not noop:
         subprocess.call(cmd)
+        if wait:
+            wait_for_destroyed(stack_name)
