@@ -84,6 +84,14 @@ def create_or_update(verb, template, stack_name, params, quiet, noop, wait):
             wait_for_created_or_updated(verb, stack_name)
 
 
+def create(template, stack_name, params, quiet, noop, wait):
+    create_or_update('create', template, stack_name, params, quiet, noop, wait)
+
+
+def update(template, stack_name, params, quiet, noop, wait):
+    create_or_update('update', template, stack_name, params, quiet, noop, wait)
+
+
 def destroy(stack_name, quiet=False, noop=False, wait=False):
     cmd = ['aws', 'cloudformation', 'delete-stack',
            "--stack-name", stack_name]
