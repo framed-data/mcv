@@ -95,10 +95,6 @@ def destroy(stack_name, quiet=False, noop=False, wait=False):
     elif not quiet:
         print("I am about to execute this aws command:")
         print(cmd_str)
-        print("\nNote that you will have no indication of whether")
-        print("the command was successful, but if you want to check")
-        print("on it afterwards, run the following command:")
-        print("aws cloudformation describe-stacks --stack-name " + stack_name)
     if not noop:
         subprocess.call(cmd)
         if wait:
