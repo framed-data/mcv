@@ -4,6 +4,7 @@ import os.path
 import subprocess
 import sys
 import time
+import json
 
 
 def _make_params(params):
@@ -60,6 +61,22 @@ def wait_for_destroyed(stack_name):
     sys.stdout.write("Waiting for stack " + stack_name + " to be destroyed.")
     sys.stdout.flush()
     wait_for_stack_status(stack_name, '')
+
+
+def get_current_params(stack_name):
+    command = ["aws", "cloudformation", "describe-stacks",
+               "--stack-name", stack_name]
+    output = subprocess.check_output(command)
+    params = json.loads(output)['Stacks'][0]['Parameters']
+    return {p['ParameterKey']: p['ParameterValue'] for p in params}
+
+
+def load_params(stack_name, params):
+    # If any of the parameters are specified on the command-line, those values
+    # should overwrite what's currently in the stack.
+    curr_params = get_current_params(stack_name)
+    # Merge the dicts, preferring the latter dict in case of a key conflict.
+    return dict(curr_params.items() + params.items())
 
 
 def create_or_update(verb, template, stack_name, params, quiet, noop, wait):
