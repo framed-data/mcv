@@ -40,12 +40,19 @@ def get_stack_status(stack_name):
     return subprocess.check_output(cmd).strip().strip('"')
 
 
-def wait_for_stack_status(stack_name, desired_status):
-    while (get_stack_status(stack_name) != desired_status):
+def wait_for_stack_status(stack_name, desired_status, bad_status=None):
+    status = get_stack_status(stack_name)
+    while status != desired_status:
+        if bad_status and status == bad_status:
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+            return False
         time.sleep(5)
         sys.stdout.write('.')
         sys.stdout.flush()
+        status = get_stack_status(stack_name)
     sys.stdout.write('\n')
+    return True
 
 
 def wait_for_created_or_updated(verb, stack_name):
@@ -53,7 +60,12 @@ def wait_for_created_or_updated(verb, stack_name):
                      " to be " + verb + "d.")
     sys.stdout.flush()
     desired_status = verb.upper() + '_COMPLETE'
-    wait_for_stack_status(stack_name, desired_status)
+    success = wait_for_stack_status(stack_name, desired_status,
+                                    'ROLLBACK_COMPLETE')
+    if not success:
+        print("There was a problem, and the stack has been rolled back.")
+        print("See the CloudFormation event log in the AWS console " +
+              "for more info")
 
 
 def wait_for_destroyed(stack_name):
