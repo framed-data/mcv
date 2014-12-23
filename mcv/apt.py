@@ -80,7 +80,7 @@ def rm_source_list(list_name):
 
 def status(pkgs):
     """Return the install status of the given packages."""
-    return {p: _dpkg_status(_dpkg_query_local(p)) for p in pkgs}
+    return dict((p, _dpkg_status(_dpkg_query_local(p))) for p in pkgs)
 
 
 def _install(pkgs):

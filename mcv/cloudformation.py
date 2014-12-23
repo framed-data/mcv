@@ -80,7 +80,7 @@ def get_current_params(stack_name):
                "--stack-name", stack_name]
     output = subprocess.check_output(command)
     params = json.loads(output)['Stacks'][0]['Parameters']
-    return {p['ParameterKey']: p['ParameterValue'] for p in params}
+    return dict((p['ParameterKey'], p['ParameterValue']) for p in params)
 
 
 def load_params(stack_name, params):

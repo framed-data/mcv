@@ -4,7 +4,7 @@ import itertools
 
 
 def select_keys(d, keys):
-    return {k: d.get(k) for k in keys if d.get(k)}
+    return dict((k, d.get(k)) for k in keys if d.get(k))
 
 
 def merge_dicts(*ds):
