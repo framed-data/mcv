@@ -62,7 +62,7 @@ def import_key(keyserver, key_id):
 
 def _source_list_path(list_name):
     filename = list_name if list_name.endswith('list') else list_name + ".list"
-    return '/etc/apt/sources.list.d/{}'.format(filename)
+    return '/etc/apt/sources.list.d/{0}'.format(filename)
 
 
 def add_source_list(list_name, lines):

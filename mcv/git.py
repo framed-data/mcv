@@ -23,7 +23,7 @@ def git_ssh_env(key_path, opts={}):
     and a dictionary opts={} which contains SSH -o options,
     as explained in man pages for ssh_config(5)
     """
-    opt_pairs = [['-o', "{}={}".format(k, v)] for k, v in opts.iteritems()]
+    opt_pairs = [['-o', "{0}={1}".format(k, v)] for k, v in opts.iteritems()]
     opts_chained = [o for o in itertools.chain(*opt_pairs)]
 
     temp_ssh_script = lines_to_string(

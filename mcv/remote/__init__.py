@@ -89,7 +89,7 @@ def execute(ssh, cmd, sudo=False, stdout=sys.stdout, stderr=sys.stderr):
     # `subprocess`-style.  Handle it nicely.
     cmd_string = cmd if isinstance(cmd, basestring) else ' '.join(cmd)
 
-    final_cmd = '/usr/bin/sudo /bin/sh -c {}'.format(
+    final_cmd = '/usr/bin/sudo /bin/sh -c {0}'.format(
         pipes.quote(cmd_string)) if sudo else cmd_string
 
     bufsize = -1
@@ -130,7 +130,7 @@ def _copy(ssh, local_src, remote_dst, sudo=False):
         remote_temppath = ssh_stdout.read().strip()
         with sftp_connection(ssh) as sftp:
             sftp.put(local_src, remote_temppath)
-        cmd = '/usr/bin/sudo mv {} {}'.format(remote_temppath, remote_dst)
+        cmd = '/usr/bin/sudo mv {0} {1}'.format(remote_temppath, remote_dst)
         print cmd
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
     else:
@@ -159,16 +159,16 @@ def deploy(ssh, local_src, remote_dst, sudo=False, excludes=['.git']):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('mktemp')
     remote_temppath = ssh_stdout.read().strip()
 
-    sys.stderr.write("Copying tarball to {}\n".format(remote_temppath))
+    sys.stderr.write("Copying tarball to {0}\n".format(remote_temppath))
 
     _copy(ssh, temp.name, remote_temppath, sudo=False)
 
     sys.stderr.write("Making target directory\n")
-    mkdir_cmd = 'mkdir -p {}'.format(remote_dst)
+    mkdir_cmd = 'mkdir -p {0}'.format(remote_dst)
 
     out, err, exit = execute(ssh, mkdir_cmd, sudo=sudo)
 
-    tar_cmd = 'tar -xvf {} -C {}'.format(remote_temppath, remote_dst)
+    tar_cmd = 'tar -xvf {0} -C {1}'.format(remote_temppath, remote_dst)
 
     sys.stderr.write("Extracting tar to target directory\n")
 

@@ -12,7 +12,7 @@ def _make_params(params):
     list of words ready to be passed to an `aws cloudformation` command,
     including the `--parameters` word at the beginning."""
     return ["--parameters"] + \
-           ["ParameterKey={},ParameterValue={}".format(k, params[k])
+           ["ParameterKey={0},ParameterValue={1}".format(k, params[k])
             for k in params]
 
 
