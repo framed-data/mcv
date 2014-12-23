@@ -2,9 +2,11 @@ import subprocess
 import sys
 import re
 import os
+import distutils.spawn
 
-pip_cmd = "/usr/bin/pip"
-pip_list_cmd = [pip_cmd, 'freeze']
+
+def _pip_cmd():
+    return distutils.spawn.find_executable('pip')
 
 
 def _status(pip_output):
@@ -15,7 +17,7 @@ def _status(pip_output):
 
 
 def status(pkgs):
-    out = subprocess.check_output(pip_list_cmd).strip()
+    out = subprocess.check_output([_pip_cmd(), 'freeze']).strip()
     installed = _status(out)
     return {p: installed.get(p) for p in pkgs}
 
@@ -26,7 +28,7 @@ def _install_cmd(pkgs, upgrade=False):
 
     opt_upgrade = ['--upgrade'] if upgrade else []
 
-    return [pip_cmd, 'install'] + opt_upgrade + pkgs
+    return [_pip_cmd(), 'install'] + opt_upgrade + pkgs
 
 
 def install(pkgs, upgrade=False):
