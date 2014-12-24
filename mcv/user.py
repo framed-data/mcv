@@ -5,9 +5,9 @@ import os
 
 
 def ent_passwd(username):
-    out = subprocess.\
-        check_output(["/usr/bin/getent", "passwd", username]).\
-        strip()
+    command = ["/usr/bin/getent", "passwd", username]
+    out = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].\
+            strip()
     if bool(out):
         field_keys = ['user', 'pass', 'uid', 'gid', 'comment', 'home', 'shell']
         field_types = [str, str, int, int, str, str, str]

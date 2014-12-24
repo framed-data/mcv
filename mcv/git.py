@@ -79,7 +79,10 @@ def fetch(repo_path, key_path, ssh_opts={}):
 
 
 def _show_ref(repo_path):
-    return subprocess.check_output(['git', 'show-ref'], cwd=repo_path)
+    return subprocess.Popen(
+            ['git', 'show-ref'],
+            stdout=subprocess.PIPE,
+            cwd=repo_path).communicate()[0]
 
 
 def _refs(show_ref_output):
@@ -109,7 +112,11 @@ def export(repo_path, deploy_path, rev, opts={}):
 
         cmd_tmpl = "git archive {rev} | tar -x -C {dir}"
         cmd = cmd_tmpl.format(rev=rev, dir=deploy_path)
-        out = subprocess.check_output(cmd, cwd=repo_path, shell=True)
+        out = subprocess.Popen(
+                cmd,
+                cwd=repo_path,
+                shell=True,
+                stdout=subprocess.PIPE).communicate()[0]
         mcv.file.ch_ext(
             deploy_path,
             mcv.util.merge_dicts(

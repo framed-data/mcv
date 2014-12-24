@@ -7,7 +7,8 @@ import paramiko
 
 
 def _get_ssh_config():
-    return subprocess.check_output(['vagrant', 'ssh-config'])
+    return subprocess.Popen(
+            ['vagrant', 'ssh-config'], stdout=subprocess.PIPE).communicate()[0]
 
 
 def _parse_ssh_config(vagrant_ssh_output):

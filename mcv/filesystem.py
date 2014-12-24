@@ -43,7 +43,9 @@ def mkfs(dev, dst_fstype, opts, force=False, verbose='error'):
         if out != 0:
             src_fstype = None
         else:
-            out = subprocess.check_output(cmd, stderr=sys.stderr)
+            out = subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE,
+                    stderr=sys.stderr).communicate()[0]
             src_fstype = out.strip()
 
     if src_fstype == dst_fstype:

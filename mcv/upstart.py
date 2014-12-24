@@ -4,7 +4,8 @@ import re
 
 def status(service_name):
     """Query Upstart status"""
-    output = subprocess.check_output(['status', service_name])
+    output = subprocess.Popen(
+            ['status', service_name], stdout=subprocess.PIPE).communicate()[0]
     re_tmpl = '(?P<service>\S+) (?P<status>[\w/]+)(, process (?P<proc>\d+))?'
     r = re.compile(re_tmpl)
     m = r.match(output)

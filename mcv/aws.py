@@ -26,7 +26,8 @@ Perhaps the key-pair does not exist, or you do not have access to it?
 def has_bucket(bucket, require=False):
     with open("/dev/null", 'w') as devnull:
         cmd = [aws_cmd, 's3api', 'list-buckets']
-        output = subprocess.check_output(cmd, stderr=devnull)
+        output = subprocess.Popen(
+                cmd, stderr=devnull, stdout=subprocess.PIPE).communicate()[0]
     buckets = json.loads(output)['Buckets']
     bkt_names = [bkt['Name'] for bkt in buckets]
     success = bucket in bkt_names
@@ -45,7 +46,8 @@ def has_s3_object(bucket, path, require=False):
     s3_obj = "s3://{0}/{1}".format(bucket, path.lstrip("/"))
     with open("/dev/null", 'w') as devnull:
         cmd = [aws_cmd, 's3', 'ls', s3_obj]
-        output = subprocess.check_output(cmd, stderr=devnull)
+        output = subprocess.Popen(
+                cmd, stderr=devnull, stdout=subprocess.PIPE).communicate()[0]
     success = len(output) > 0
 
     if require and not success:

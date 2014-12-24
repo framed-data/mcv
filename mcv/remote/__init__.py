@@ -154,7 +154,7 @@ def deploy(ssh, local_src, remote_dst, sudo=False, excludes=['.git']):
 
     sys.stderr.write("Tarring with: " + str(cmd) + "\n")
 
-    out = subprocess.check_output(cmd)
+    out = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
 
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('mktemp')
     remote_temppath = ssh_stdout.read().strip()

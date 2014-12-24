@@ -17,7 +17,10 @@ def _dpkg_query_local(pkg):
     cmd = _dpkg_query_cmd(pkg)
     try:
         with open(os.devnull, 'w') as devnull:
-            output = subprocess.check_output(cmd, stderr=devnull)
+            output = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=devnull).communicate()[0]
         return output
     except subprocess.CalledProcessError, e:
         if e.returncode == 1:  # package not installed
@@ -45,8 +48,8 @@ def _dpkg_status(dpkg_query_output):
 
 
 def key_exists(key_id, keyring='/etc/apt/trusted.gpg'):
-    out = subprocess.check_output(['gpg', '--list-keys', '--primary-keyring',
-                                  keyring])
+    command = ['gpg', '--list-keys', '--primary-keyring', keyring]
+    out = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0]
     lines = out.split("\n")
     return any(key_id in l for l in lines)
 

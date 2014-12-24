@@ -29,7 +29,8 @@ def check_template(template, verbose=False):
     # The command will output to STDOUT if successful, and STDERR if
     # unsuccessful, but we want neither output to be seen by the user.
     try:
-        subprocess.check_output(cmd)
+        with open('/dev/null', 'w') as devnull:
+            subprocess.call(cmd, stdout=devnull, stderr=devnull)
         return True
     except subprocess.CalledProcessError:
         return False
@@ -38,7 +39,8 @@ def check_template(template, verbose=False):
 def get_stack_status(stack_name):
     query = "Stacks[?StackName==`" + stack_name + "`].StackStatus | [0]"
     cmd = ['aws', 'cloudformation', 'describe-stacks', "--query", query]
-    return subprocess.check_output(cmd).strip().strip('"')
+    return subprocess.Popen(
+            cmd, stdout=subprocess.PIPE).communicate()[0].strip().strip('"')
 
 
 def wait_for_stack_status(stack_name, desired_status, bad_status=None):
@@ -78,7 +80,7 @@ def wait_for_destroyed(stack_name):
 def get_current_params(stack_name):
     command = ["aws", "cloudformation", "describe-stacks",
                "--stack-name", stack_name]
-    output = subprocess.check_output(command)
+    output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0]
     params = json.loads(output)['Stacks'][0]['Parameters']
     return dict((p['ParameterKey'], p['ParameterValue']) for p in params)
 
