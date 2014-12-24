@@ -56,3 +56,13 @@ Perhaps the bucket or file does not exist, or you do not have access to it?
 """.strip().format(path, bucket))
         sys.exit(1)
     return success
+
+
+def get_metadata(key):
+    aws_metadata_url = "http://169.254.169.254/latest/meta-data/"
+    command = ['curl', '-s', aws_metadata_url + key]
+    return subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0]
+
+
+def get_instance_id():
+    return get_metadata('instance-id')
