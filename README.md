@@ -1,83 +1,39 @@
 mcv
 ===
 
-A rough-and-tumble configuration management system.
-
-MCV is a Python library that enables you to do common sysadmin,
-configuration management and deployment tasks.  Having these kinds of
-tools allows you to make your own scripts that can drop onto a target
-system and set it up as desired.
+MCV is a Python library that provides configuration management tools in
+a simple package.
 
 [![PyPI version](https://badge.fury.io/py/mcv.svg)](http://badge.fury.io/py/mcv) ![buildstatus](https://circleci.com/gh/framed-data/mcv.png?circle-token=0a1a9394ebb8bd9537203f1daf019edfbd4c2cd1)
 
-Quickstart
-----------
+MCV ships with modules for managing a variety of common functions:
 
-MCV works in two parts:
+- packages (e.g. `apt` and `pip`)
+- users and groups
+- files and directories
+- git and github
+- and more!
 
-1. The local phase is a Python script that runs on a target box,
-   setting up however you like using standard Python tools, plus
-   MCV's useful toolbox.
 
-2. The remote phase bootstraps a target system remotely over SSH,
-   setting up prereqs for your script, and then copies your script
-   over and executes it.
+## Rationale
 
-Example local script:
+MCV is based on two ideas:
 
-```python
-#!/usr/bin/python
+1. Real ops tasks demand no less than a full, first class programming
+   language.  JSON and DSLs are empirically not expressive enough.  Bash
+   is general but clunky and arcane.  By creating Python libraries, we
+   provide a simple, powerful and community-accessible toolbox for
+   getting things done.
 
-import labrador, mcv.apt, mcv.user
+2. Remote management is a myth.  Trying to execute commands over the
+   wire forces us into impoverished latency and programming interfaces,
+   e.g.  forcing everything to fit SSH shell commands.  The benefit of
+   being able to write locally-running code far outweighs the cost of
+   shipping that code to a box, especially since the management code
+   need not change on every run.
 
-if __name__ == "__main__":
-    mcv.apt.install(['git', 'python-pip', 'docker.io'])
-
-    users = ['torvalds']
-
-    for user in users:
-        authorized_keys = labrador.get('https://github.com/{}.keys'.format(user))
-        mcv.user.add(
-            user,
-            mod_opts={'groups': ['sudo']},
-            ext_opts={'authorized_keys': authorized_keys})
-```
-
-Example remote bootstrap script:
-
-```python
-#!/usr/bin/env python
-
-import mcv.remote, mcv.remote.apt, mcv.remote.pip
-
-conn_spec = {'host': 'mybox.example.com', 'user': 'me'}
-
-# copy your MCV setup script from above to remote box
-with mcv.remote.connection(conn_spec) as ssh:
-    mcv.remote.apt.install(ssh, ['python-dev', 'python-pip', 'git'])
-    mcv.remote.pip.install(ssh, ['labrador', 'mcv'], sudo=True)
-    mcv.remote.deploy(ssh, '.', '/opt/mcv', excludes=['.git', '.vagrant'], sudo=True)
-    out, err, exist_status = mcv.remote.execute(ssh, '/opt/mcv/myscript.py', sudo=True)
-```
-
-Design and Rationale
---------------------
-
-MCV makes a few different design choices vs. other systems:
-
-- It's masterless and agentless.  You don't need to set up
-  infrastructure in order to run the infrastructure, there's
-  no daemon running on any of the coordinator or target boxes.
-
-- It's just a Python library.  You get all of the power of the
-  language and libraries, with none of the mandatory abstractions
-  of other systems.
-
-- It runs locally on target systems.  Programs work as easily,
-  quickly and powerfully as you expect them to, rather than
-  being hamstrung by needing to execute everything across the wire.
-
-The aspiration for MCV is to reduce the maze of abstraction created by
-current configuration management tools, or alternatively to increase
-the level of abstraction of shell scripts to having the full
-expressivity of programming languages.
+Trying to define The One True System rarely succeeds.  Instead, a
+library-based approach provides increasingly better tools so that
+everyone can build the system they actually need, delegate functions
+that are already well-defined and pre-solvable, and fill in any
+remaining gaps using a solid general purpose programming language.
