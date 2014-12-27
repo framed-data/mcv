@@ -22,4 +22,4 @@ def artifacts(token, username, project, build_num):
 
 
 def get_file(token, url):
-    return mcv.http.get_file(url, {'circle-token': token})
+    return mcv.http.get_file(url, params={'circle-token': token})
