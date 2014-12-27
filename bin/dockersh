@@ -1,0 +1,11 @@
+#!/bin/bash
+
+IMG=$1
+
+if [ -z "$IMG" ];
+then
+  IMG="ubuntu:14.04"
+fi
+
+echo "Starting Docker.  MCV will be mounted in /opt/mcv"
+sudo docker run -t -i -v `pwd`:/opt/mcv $IMG /bin/bash
