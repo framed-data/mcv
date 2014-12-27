@@ -2,7 +2,9 @@
 
 from __future__ import absolute_import
 
+import mcv.file
 import mcv.http
+import subprocess
 import tarfile
 
 
@@ -29,7 +31,15 @@ def get_archive_tarball(owner, repo, rev, **get_kwargs):
 def extract_tarball(tarfile, path):
     """Specialized tarball extractor that strips the first
     directory component from the tarball that GitHub puts in."""
-    for tarinfo in tarfile.getmembers():
-        subpath_ix = tarinfo.name.find("/")
-        tarinfo.name = tarinfo.name[subpath_ix + 1:]
-        tarfile.extract(tarinfo, path)
+    return subprocess.call(
+        ['tar', 'zxvf',
+         tarfile.name,
+         '--strip-components', '1',
+         '-C', path])
+
+
+def deploy_repo(user, repo, rev, path, oauth):
+    auth = (oauth, 'x-oauth-basic')
+    tarball = get_archive_tarball(user, repo, rev, auth=auth)
+    mcv.file.mkdir(path)
+    extract_tarball(tarball, path)
