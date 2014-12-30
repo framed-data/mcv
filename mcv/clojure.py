@@ -6,9 +6,14 @@ import re
 
 def _uberjar(project_path):
     lein_cmd = distutils.spawn.find_executable('lein')
+
+    env = os.environ.copy()
+    env['LEIN_ROOT'] = 'yes'  # Allow Leiningen to run as root
+
     p = subprocess.Popen(
         [lein_cmd, "uberjar"],
         cwd=project_path,
+        env=env,
         stdout=subprocess.PIPE)
     output, output_err = p.communicate()
     return output
