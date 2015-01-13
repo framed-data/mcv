@@ -17,9 +17,11 @@ def _status(pip_output):
 
 
 def status(pkgs):
-    out = subprocess.check_output([_pip_cmd(), 'freeze']).strip()
+    cmd = [_pip_cmd(), 'freeze']
+    out = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE).communicate()[0].strip()
     installed = _status(out)
-    return {p: installed.get(p) for p in pkgs}
+    return dict((p, installed.get(p)) for p in pkgs)
 
 
 def _install_cmd(pkgs, upgrade=False):

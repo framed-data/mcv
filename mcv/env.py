@@ -12,7 +12,7 @@ def parse_environment_file():
         raw_lines = efile.readlines()
         lines = [re.sub(r'#.*$', '', line).strip() for line in raw_lines]
         matches = [re.match(r'^(\w+)=(.*)$', line) for line in lines]
-        return {m.group(1): m.group(2) for m in matches if m}
+        return dict((m.group(1), m.group(2)) for m in matches if m)
 
 
 def append_env_setting(name, value):

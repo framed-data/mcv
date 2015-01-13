@@ -12,7 +12,7 @@ def _status(ssh, pkg):
 
 
 def status(ssh, pkgs):
-    return {p: _status(ssh, p) for p in pkgs}
+    return dict((p, _status(ssh, p)) for p in pkgs)
 
 
 def _install(ssh, pkgs):

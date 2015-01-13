@@ -5,16 +5,16 @@ import os
 
 
 def ent_passwd(username):
-    out = subprocess.\
-        check_output(["/usr/bin/getent", "passwd", username]).\
-        strip()
+    command = ["/usr/bin/getent", "passwd", username]
+    out = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].\
+            strip()
     if bool(out):
         field_keys = ['user', 'pass', 'uid', 'gid', 'comment', 'home', 'shell']
         field_types = [str, str, int, int, str, str, str]
         field_values = out.split(':')
-        return {k: t(v)
-                for k, t, v
-                in zip(field_keys, field_types, field_values)}
+        return dict((k, t(v))
+                    for k, t, v
+                    in zip(field_keys, field_types, field_values))
     else:
         return None
 
@@ -56,7 +56,7 @@ def mod(username, opt_dict):
     if len(opt_dict) == 0:
         return
 
-    cmd_args = {"--" + k: join_arg(v) for k, v in opt_dict.iteritems()}
+    cmd_args = dict(("--" + k, join_arg(v)) for k, v in opt_dict.iteritems())
     opts = list(itertools.chain(*cmd_args.iteritems()))
     cmd = ["usermod"] + opts + [username]
     retval = subprocess.call(cmd, stdout=sys.stdout)
