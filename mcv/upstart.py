@@ -27,3 +27,9 @@ def start(service_name, restart=False):
         return subprocess.call([action, service_name])
     else:
         return None
+
+
+def stop(service_name):
+    _, service_status, _ = status(service_name)
+    if service_status == 'start/running':
+        subprocess.call(['stop', service_name])
