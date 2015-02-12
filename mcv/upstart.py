@@ -1,14 +1,16 @@
 import subprocess
 import re
 
+
 def command(command_name):
     return '/sbin/{}'.format(command_name)
 
 
 def status(service_name):
     """Query Upstart status"""
-    output = subprocess.Popen(
-            [command('status'), service_name], stdout=subprocess.PIPE).communicate()[0]
+    output = subprocess.Popen([command('status'), service_name],
+                              stdout=subprocess.PIPE)\
+                       .communicate()[0]
     re_tmpl = '(?P<service>\S+) (?P<status>[\w/]+)(, process (?P<proc>\d+))?'
     r = re.compile(re_tmpl)
     m = r.match(output)
