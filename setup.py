@@ -8,7 +8,7 @@ setup(
         'labrador',
         'paramiko',
         'treant',
-        'requests'
+        'requests',
         'jinja2'],
     author = "Elliot Block",
     author_email = "elliot@framed.io",
