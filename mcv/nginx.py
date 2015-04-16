@@ -7,7 +7,7 @@ def nginx_reload():
 
 
 def rollout_servers(template_path, config_path, addrs):
-    """Render a set of server addresses into a template,
+    """Render a set of server addresses into a Jinja2 template,
     copy the output into the configuration path and reload
     running nginx configuration
 
