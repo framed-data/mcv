@@ -16,4 +16,3 @@ def rollout_servers(template_path, config_path, addrs):
     with open(config_path, "w") as f:
         f.write(tmpl.render(addrs=addrs))
     nginx_reload()
-
