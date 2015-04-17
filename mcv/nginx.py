@@ -12,7 +12,9 @@ def rollout_servers(template_path, config_path, addrs):
     running nginx configuration
 
     Template must expect `addrs` variable"""
-    tmpl = Template(open(template_path, "r").read())
+    with open(template_path, "r") as f:
+        tmpl = Template(f.read())
+
     with open(config_path, "w") as f:
         f.write(tmpl.render(addrs=addrs))
     nginx_reload()
