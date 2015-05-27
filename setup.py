@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = "mcv",
-    version = "0.28.0",
+    version = "0.29.0",
     packages = find_packages(),
     install_requires = [
         'pyyaml',
