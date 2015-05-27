@@ -148,7 +148,7 @@ def deploy(ssh, local_src, remote_dst, sudo=False, excludes=['.git']):
     temp = tempfile.NamedTemporaryFile()
     exclude_pairs = [['--exclude', e] for e in excludes]
 
-    cmd = ['/bin/tar', '-cvf', temp.name] + \
+    cmd = ['/bin/tar', '-cf', temp.name] + \
           [e for e in itertools.chain(*exclude_pairs)] + \
           [local_src]
 
@@ -168,7 +168,7 @@ def deploy(ssh, local_src, remote_dst, sudo=False, excludes=['.git']):
 
     out, err, exit = execute(ssh, mkdir_cmd, sudo=sudo)
 
-    tar_cmd = 'tar -xvf {0} -C {1}'.format(remote_temppath, remote_dst)
+    tar_cmd = 'tar -xf {0} -C {1}'.format(remote_temppath, remote_dst)
 
     sys.stderr.write("Extracting tar to target directory\n")
 
