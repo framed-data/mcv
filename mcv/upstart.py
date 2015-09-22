@@ -18,7 +18,7 @@ def status(service_name):
     return [service, status, pid]
 
 
-def start(service_name, restart=False):
+def start(service_name, restart=False, args=[]):
     """Idempotent Upstart start"""
     _, service_status, _ = status(service_name)
 
@@ -29,7 +29,7 @@ def start(service_name, restart=False):
         action = 'start'
 
     if action:
-        return subprocess.call([command(action), service_name])
+        return subprocess.call([command(action), service_name, ''.join(args)])
     else:
         return None
 
