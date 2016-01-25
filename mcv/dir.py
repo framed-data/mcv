@@ -10,6 +10,8 @@ This module should mostly expose things in terms of `path`s, not
 level  if necessary.
 """
 
+from __future__ import absolute_import
+
 import treant
 import os
 import mcv.file
