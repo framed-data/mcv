@@ -5,6 +5,8 @@ to filter out old rules from the sudoers file, and add new
 rules by templating a rules file.
 """
 
+from __future__ import absolute_import
+
 import re
 import os
 import mcv.file

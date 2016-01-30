@@ -3,6 +3,8 @@
 Credit to Alexander Bulimov <lazywolf0@gmail.com> and Seth Vidal (RIP)
 for writing the Ansible modules on which this is based."""
 
+from __future__ import absolute_import
+
 import sys
 import os
 import subprocess

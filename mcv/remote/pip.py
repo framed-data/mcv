@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import mcv.pip
 import mcv.remote
 import sys

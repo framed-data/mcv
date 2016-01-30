@@ -1,5 +1,7 @@
 """AWS CloudFormation utilities"""
 
+from __future__ import absolute_import
+
 import os.path
 import subprocess
 import sys
