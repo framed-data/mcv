@@ -107,7 +107,7 @@ def gather_packages():
     """
     dpkg_query_cmd = [
         "/usr/bin/dpkg-query", "-W",
-        "-f", "${Status}\t${Package}\t${Version}\n",
+        "-f", "${Status}\t${Package}\t${source:Version}\n",
     ]
 
     process = subprocess.Popen(dpkg_query_cmd, stdout=subprocess.PIPE)
