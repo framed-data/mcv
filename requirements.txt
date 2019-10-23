@@ -1,5 +1,5 @@
 Labrador==0.5.0
-PyYAML==3.11
+PyYAML==5.1
 argparse==1.2.1
 ecdsa==0.13.3
 jprops==1.0
