@@ -9,4 +9,4 @@ pycrypto==2.6.1
 requests==2.20.0
 treant==0.4.0
 wsgiref==0.1.2
-jinja2==2.7.3
+jinja2==2.11.3
