@@ -6,7 +6,7 @@ jprops==1.0
 nose==1.3.3
 paramiko==2.0.9
 pycrypto==2.6.1
-requests==2.20.0
+requests==2.31.0
 treant==0.4.0
 wsgiref==0.1.2
 jinja2==2.11.3
